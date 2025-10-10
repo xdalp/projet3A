@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import os
+from fonctions import download_to_SSPCloud
 
 url_BDTOPO = "https://geoservices.ign.fr/bdtopo"
 
@@ -27,7 +28,6 @@ h3_par_annee = {}
 for annee in annees:
 
     h3_annee = [h3 for h3 in h3_tags if str(annee) in h3.get_text()]
-
     if not h3_annee:
         continue  
 
@@ -42,6 +42,7 @@ for annee in annees:
         h3_selectionne = h3_annee[0]
     
     h3_par_annee[annee] = h3_selectionne
+
 
 dep = re.compile(r"D0([0-8][0-9]|9[0-5])")
 
@@ -60,6 +61,28 @@ for annee, h3 in h3_par_annee.items():
                         href_list.append(a_tag["href"])
     href_par_annee[annee] = href_list
 
+print(href_par_annee[2008])
+
 href_par_annee={}
 href_par_annee={2025:["https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-3_TOUSTHEMES_GPKG_LAMB93_D092_2024-03-15/BDTOPO_3-3_TOUSTHEMES_GPKG_LAMB93_D092_2024-03-15.7z"]}
 
+#ENREGISTREMENT DES DONNEES SUR ONYXIA
+user = "onyxia"
+base_path=f"{user}/diffusion/"
+
+for annee, urls in href_par_annee.items():
+    for url in urls:
+        # Extraire DXXX depuis l'URL
+        match = dep.search(url)
+        if match:
+            dxxx = match.group(1)
+        else:
+            dxxx = "unknown"
+
+        # Extraire l'extension du fichier
+        ext = url.split(".")[-1]
+
+        sspcloud_path = f"{base_path}{annee}_{dxxx}.{ext}"
+
+        # Télécharger le fichier sur SSP Cloud
+        download_to_SSPCloud(url, sspcloud_path)
