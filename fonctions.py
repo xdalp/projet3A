@@ -56,3 +56,66 @@ def download_to_SSPCloud(url, sspcloud_path, max_retries=5):
             print(f"Erreur lors du téléchargement de {url}: {e}")
             return
     print(f"Échec après {max_retries} tentatives pour {url}")
+
+
+import boto3
+import geopandas as gpd
+import tempfile
+import os
+import py7zr 
+import glob
+from credentials import s3
+
+def load_shapefile(path, bucket="mgarbe", region=""):
+    """
+    Récupère un shapefile depuis un bucket S3 et le charge dans un GeoDataFrame GeoPandas.
+    """
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        archive_path = os.path.join(tmpdir, os.path.basename(path))
+        # vérif d’accès
+        try:
+            s3.head_object(Bucket=bucket, Key=path)
+        except s3.exceptions.ClientError as e:
+            if e.response['Error']['Code'] == "403":
+                raise RuntimeError("Accès refusé : vos credentials AWS ont probablement expiré.")
+            else:
+                raise
+        s3.download_file(bucket, path, archive_path)
+        
+        with py7zr.SevenZipFile(archive_path, mode='r') as archive: #décompression
+            archive.extractall(path=tmpdir)
+        #récupération shapefile
+       #         pattern = os.path.join(
+#             tmpdir,
+#             "BDTOPO*",
+#             "BDTOPO",
+#             "1_DONNEES*",
+#             "BDT*",
+#             "E_BATI",
+#             "BATI_INDUSTRIEL.SHP"
+#         )
+
+        pattern = os.path.join(
+            tmpdir,
+            "BDTOPO*",
+            "BDTOPO",
+            "1_DONNEES*",
+            "BDT*",
+            "BATI",
+            "BATIMENT.shp"
+        )
+
+        shp_matches = glob.glob(pattern, recursive=True)
+
+        if not shp_matches:
+            raise FileNotFoundError(
+                f"Aucun shapefile XXX.SHP trouvé dans la structure attendue ({pattern})"
+            )
+
+        shp_path = shp_matches[0]
+
+        # Lecture du shapefile
+        gdf = gpd.read_file(shp_path)
+
+    return gdf
