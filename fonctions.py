@@ -82,29 +82,30 @@ def load_shapefile(path, bucket="mgarbe", region=""):
             else:
                 raise
         s3.download_file(bucket, path, archive_path)
-        
+
         with py7zr.SevenZipFile(archive_path, mode='r') as archive: #décompression
             archive.extractall(path=tmpdir)
-        #récupération shapefile
-       #         pattern = os.path.join(
-#             tmpdir,
-#             "BDTOPO*",
-#             "BDTOPO",
-#             "1_DONNEES*",
-#             "BDT*",
-#             "E_BATI",
-#             "BATI_INDUSTRIEL.SHP"
-#         )
-
-        pattern = os.path.join(
-            tmpdir,
-            "BDTOPO*",
-            "BDTOPO",
-            "1_DONNEES*",
-            "BDT*",
-            "BATI",
-            "BATIMENT.shp"
-        )
+        date_int = int(os.path.basename(path).split("_")[0])
+        print(date_int)
+        if date_int < 2019:
+             pattern = os.path.join(
+                tmpdir,
+                "BDTOPO*",
+                "BDTOPO",
+                "1_DONNEES*",
+                "BDT*",
+                "E_BATI",
+                "BATI_INDUSTRIEL.SHP")
+        else:
+            pattern = os.path.join(
+                tmpdir,
+                "BDTOPO*",
+                "BDTOPO",
+                "1_DONNEES*",
+                "BDT*",
+                "BATI",
+                "BATIMENT.shp"
+            )
 
         shp_matches = glob.glob(pattern, recursive=True)
 
