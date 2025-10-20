@@ -120,3 +120,5 @@ def load_shapefile(path, bucket="mgarbe", region=""):
         gdf = gpd.read_file(shp_path)
 
     return gdf
+
+    
