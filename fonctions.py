@@ -85,8 +85,10 @@ def load_shapefile(path, bucket="mgarbe", region=""):
 
         with py7zr.SevenZipFile(archive_path, mode='r') as archive: #décompression
             archive.extractall(path=tmpdir)
-        date_int = int(os.path.basename(path).split("_")[0])
-        print(date_int)
+        base_name = os.path.splitext(os.path.basename(path))[0]
+        parts = base_name.split("_")
+        date_int = int(parts[0])
+        dep = parts[1]
         if date_int < 2019:
              pattern = os.path.join(
                 tmpdir,
@@ -119,6 +121,91 @@ def load_shapefile(path, bucket="mgarbe", region=""):
         # Lecture du shapefile
         gdf = gpd.read_file(shp_path)
 
+           # Ajout des colonnes 'annee' et 'departement'
+        gdf["Annee"] = date_int
+        gdf["Dep"] = dep
+
     return gdf
 
+
+
+
+
+
+import geopandas as gpd
+
+def filter_shapefile(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    2 versions du shapefile = 2 filtres 
+    - v1 : filtre NATURE ∈ ['Bâtiment commercial', 'Bâtiment industriel']
+    - v2 : filtre :
+            NATURE == 'Industriel, agricole ou commercial'
+            et USAGE1 ∈ ['Industriel', 'Commercial et services']
+    """
+
+    # Vérifie la présence de D pour déterminer la version
+    is_v2 = "USAGE1" in gdf.columns
+    vec=["Annee","Dep","ORIGIN_BAT", "NATURE", "USAGE1", "USAGE2","HAUTEUR","geometry","ETAT","DATE_CREAT","DATE_MAJ","ID_SOURCE","SOURCE"]
+    cols_to_keep = [col for col in vec if col in gdf.columns]
+    gdf = gdf[cols_to_keep].copy()
     
+    if is_v2:
+        gdf = gdf[(gdf["NATURE"] == "Industriel, agricole ou commercial")
+            & (gdf["USAGE1"].isin(["Industriel", "Commercial et services"]))]
+    else:
+        gdf = gdf[gdf["NATURE"].isin(["Bâtiment commercial", "Bâtiment industriel"])]
+
+    gdf = gdf.reset_index(drop=True)
+    return gdf
+
+
+import geopandas as gpd
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import pandas as pd
+
+def process_file(path, bucket="mgarbe"):
+    """
+    Charge + filtre un shapefile unique.
+    """
+    gdf = load_shapefile(path, bucket=bucket)
+    gdf_filtered = filter_shapefile(gdf)
+    return gdf_filtered
+
+def parallel_process(all_paths, bucket="mgarbe", max_workers=None):
+    """
+    Charge les fichiers en parallèle (un processus par fichier) puis bindrow
+    """
+    results = []
+
+    with ProcessPoolExecutor(max_workers=max_workers or len(all_paths)) as executor:
+        futures = {executor.submit(process_file, path, bucket): path for path in all_paths}
+
+        for future in as_completed(futures):
+            path = futures[future]
+            try:
+                gdf = future.result()
+                print(f"{path} traité ({len(gdf)} lignes)")
+                results.append(gdf)
+            except Exception as e:
+                print(f"Erreur sur {path} : {e}")
+
+    if results:
+        full_gdf = gpd.GeoDataFrame(pd.concat(results, ignore_index=True), crs=results[0].crs)
+        print(f"Final DF : {len(full_gdf)} lignes au total")
+        return full_gdf
+    else:
+        return gpd.GeoDataFrame()
+
+
+import boto3
+from credentials import s3
+
+def list_files_onyxia(bucket_name="mgarbe", prefix="BDTOPO/"):
+    paginator = s3.get_paginator('list_objects_v2')
+    files = []
+    for page in paginator.paginate(Bucket=bucket_name, Prefix=prefix, Delimiter='/'):
+        for obj in page.get('Contents', []):
+            if obj['Key'].endswith('.7z'):
+                files.append(obj['Key'])
+
+    return files

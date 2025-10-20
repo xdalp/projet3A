@@ -1,9 +1,11 @@
 import pandas as pd
-from fonctions import load_shapefile
+from fonctions import list_files_onyxia
+from fonctions import parallel_process
 
-gdf = load_shapefile("BDTOPO/2017_74.7z")
-print(gdf["NATURE"].unique())
-print(gdf["USAGE1"].unique())
+files=list_files_onyxia()
+df=parallel_process(files)
+
+gdf = process_file("BDTOPO/2017_74.7z")
 pd.set_option('display.max_columns', None)
 print(gdf.head())
 
