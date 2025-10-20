@@ -167,6 +167,7 @@ def process_file(path, bucket="mgarbe"):
     """
     Charge + filtre un shapefile unique.
     """
+    print(f"[PID {os.getpid()}] Traitement {path}")
     gdf = load_shapefile(path, bucket=bucket)
     gdf_filtered = filter_shapefile(gdf)
     return gdf_filtered
