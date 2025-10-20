@@ -163,23 +163,26 @@ import geopandas as gpd
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import pandas as pd
 
-def process_file(path, bucket="mgarbe"):
+def process_file(path, bucket="mgarbe",target_crs="EPSG:2154"):
     """
     Charge + filtre un shapefile unique.
     """
     print(f"[PID {os.getpid()}] Traitement {path}")
     gdf = load_shapefile(path, bucket=bucket)
     gdf_filtered = filter_shapefile(gdf)
+    # conversion CRS si nécessaire
+    if gdf_filtered.crs != target_crs:
+        gdf_filtered = gdf_filtered.to_crs(target_crs)
     return gdf_filtered
 
-def parallel_process(all_paths, bucket="mgarbe", max_workers=None):
+def parallel_process(all_paths, bucket="mgarbe", max_workers=None,target_crs="EPSG:2154"):
     """
     Charge les fichiers en parallèle (un processus par fichier) puis bindrow
     """
     results = []
 
     with ProcessPoolExecutor(max_workers=max_workers or len(all_paths)) as executor:
-        futures = {executor.submit(process_file, path, bucket): path for path in all_paths}
+        futures = {executor.submit(process_file, path, bucket,target_crs): path for path in all_paths}
 
         for future in as_completed(futures):
             path = futures[future]
