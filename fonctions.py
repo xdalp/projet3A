@@ -175,31 +175,69 @@ def process_file(path, bucket="mgarbe",target_crs="EPSG:2154"):
         gdf_filtered = gdf_filtered.to_crs(target_crs)
     return gdf_filtered
 
-def parallel_process(all_paths, bucket="mgarbe", max_workers=None,target_crs="EPSG:2154"):
+import psutil
+
+def parallel_process(all_paths, bucket="mgarbe", max_workers=None, target_crs="EPSG:2154", ram_limit_fraction=0.8):
     """
-    Charge les fichiers en parallèle (un processus par fichier) puis bindrow
+    Charge les fichiers en parallèle et fusionne progressivement pour limiter la mémoire.
+    Fusion LIFO dès que 2 GDF sont disponibles.
     """
-    results = []
+    stack = []
+    total_ram_bytes = psutil.virtual_memory().total
+
+    def current_ram_percent(additional_bytes=0):
+        return (psutil.virtual_memory().used + additional_bytes) / total_ram_bytes * 100
 
     with ProcessPoolExecutor(max_workers=max_workers or len(all_paths)) as executor:
-        futures = {executor.submit(process_file, path, bucket,target_crs): path for path in all_paths}
+        futures = {executor.submit(process_file, path, bucket, target_crs): path for path in all_paths}
 
         for future in as_completed(futures):
             path = futures[future]
             try:
                 gdf = future.result()
-                print(f"{path} traité ({len(gdf)} lignes)")
-                results.append(gdf)
+                gdf_mem = gdf.memory_usage(deep=True).sum()
+                print(f"[PID] {path} traité ({len(gdf)} lignes, {gdf_mem/1e6:.1f} Mo)")
+
+                # Empilement LIFO
+                stack.append(gdf)
+
+                # Fusion progressive dès qu'il y a au moins 2 GDF
+                while len(stack) > 1:
+                    g1 = stack.pop()
+                    g2 = stack.pop()
+                    merged_mem_estimate = g1.memory_usage(deep=True).sum() + g2.memory_usage(deep=True).sum()
+                    ram_percent = current_ram_percent(merged_mem_estimate)
+                    print(f"Fusion intermédiaire : mémoire approximative utilisée {ram_percent:.1f}%")
+
+                    if ram_percent > ram_limit_fraction * 100:
+                        print(f"Limite mémoire atteinte ({ram_percent:.1f}%), arrêt du traitement")
+                        return None
+
+                    merged = pd.concat([g1, g2], ignore_index=True, sort=False)
+                    stack.append(merged)
+
             except Exception as e:
                 print(f"Erreur sur {path} : {e}")
 
-    if results:
-        full_gdf = gpd.GeoDataFrame(pd.concat(results, ignore_index=True), crs=results[0].crs)
+    # Fusion finale si plusieurs GDF restent
+    while len(stack) > 1:
+        g1 = stack.pop()
+        g2 = stack.pop()
+        merged_mem_estimate = g1.memory_usage(deep=True).sum() + g2.memory_usage(deep=True).sum()
+        ram_percent = current_ram_percent(merged_mem_estimate)
+        print(f"Fusion finale : mémoire approx. {ram_percent:.1f}%")
+        if ram_percent > ram_limit_fraction * 100:
+            print(f"Limite mémoire atteinte ({ram_percent:.1f}%), arrêt")
+            return None
+        merged = pd.concat([g1, g2], ignore_index=True, sort=False)
+        stack.append(merged)
+
+    if stack:
+        full_gdf = stack[0]
         print(f"Final DF : {len(full_gdf)} lignes au total")
         return full_gdf
     else:
         return gpd.GeoDataFrame()
-
 
 import boto3
 from credentials import s3
