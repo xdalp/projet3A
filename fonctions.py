@@ -127,8 +127,17 @@ def load_shapefile(path, bucket="mgarbe", region=""):
 
     return gdf
 
+import boto3
+from credentials import s3
+def list_files_onyxia(bucket_name="mgarbe", prefix="BDTOPO/"):
+    paginator = s3.get_paginator('list_objects_v2')
+    files = []
+    for page in paginator.paginate(Bucket=bucket_name, Prefix=prefix, Delimiter='/'):
+        for obj in page.get('Contents', []):
+            if obj['Key'].endswith('.7z'):
+                files.append(obj['Key'])
 
-
+    return files
 
 
 
@@ -159,6 +168,8 @@ def filter_shapefile(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf
 
 
+
+
 import geopandas as gpd
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import pandas as pd
@@ -167,7 +178,7 @@ def process_file(path, bucket="mgarbe",target_crs="EPSG:2154"):
     """
     Charge + filtre un shapefile unique.
     """
-    print(f"[PID {os.getpid()}] Traitement {path}")
+    #print(f"[PID {os.getpid()}] Traitement {path}")
     gdf = load_shapefile(path, bucket=bucket)
     gdf_filtered = filter_shapefile(gdf)
     # conversion CRS si nécessaire
@@ -177,77 +188,74 @@ def process_file(path, bucket="mgarbe",target_crs="EPSG:2154"):
 
 import psutil
 
-def parallel_process(all_paths, bucket="mgarbe", max_workers=None, target_crs="EPSG:2154", ram_limit_fraction=0.8):
+
+def parallel_process(all_paths, bucket="mgarbe", max_workers=None, target_crs="EPSG:2154", ram_limit_fraction=0.8, display_interval=15):
     """
-    Charge les fichiers en parallèle et fusionne progressivement pour limiter la mémoire.
-    Fusion LIFO dès que 2 GDF sont disponibles.
+    Charge les fichiers en parallèle et fusionne immédiatement chaque GDF dès qu'il est prêt,
+    pour garder la pile (stack) petite et limiter la mémoire utilisée.
+    Affiche des informations détaillées sur le traitement, la fusion et la mémoire.
+    Affichage mémoire toutes les display_interval secondes avec % fichiers fusionnés.
     """
     stack = []
     total_ram_bytes = psutil.virtual_memory().total
+    total_files = len(all_paths)
+    processed_count = 0
+    last_display = time.time()
 
     def current_ram_percent(additional_bytes=0):
         return (psutil.virtual_memory().used + additional_bytes) / total_ram_bytes * 100
 
+    def merge_with_memory_check(gdf1, gdf2):
+        """Fusionne deux GDF en vérifiant que la mémoire ne dépasse pas la limite."""
+        additional_bytes = gdf1.memory_usage(deep=True).sum() + gdf2.memory_usage(deep=True).sum()
+        ram_percent = current_ram_percent(additional_bytes)
+        #print(f"[Fusion] Fusion de 2 GDF : mémoire approx. utilisée {ram_percent:.1f}%")
+        if ram_percent > ram_limit_fraction * 100:
+            raise MemoryError(f"Fusion dépasserait la limite RAM ({ram_percent:.1f}%)")
+        merged = pd.concat([gdf1, gdf2], ignore_index=True, sort=False)
+        return merged
+
+    # Traitement des fichiers en parallèle
     with ProcessPoolExecutor(max_workers=max_workers or len(all_paths)) as executor:
         futures = {executor.submit(process_file, path, bucket, target_crs): path for path in all_paths}
 
         for future in as_completed(futures):
             path = futures[future]
             try:
+                #print(f"[Décompression] {path}")
                 gdf = future.result()
                 gdf_mem = gdf.memory_usage(deep=True).sum()
-                print(f"[PID] {path} traité ({len(gdf)} lignes, {gdf_mem/1e6:.1f} Mo)")
+                processed_count += 1
 
-                # Empilement LIFO
-                stack.append(gdf)
-
-                # Fusion progressive dès qu'il y a au moins 2 GDF
-                while len(stack) > 1:
-                    g1 = stack.pop()
-                    g2 = stack.pop()
-                    merged_mem_estimate = g1.memory_usage(deep=True).sum() + g2.memory_usage(deep=True).sum()
-                    ram_percent = current_ram_percent(merged_mem_estimate)
-                    print(f"Fusion intermédiaire : mémoire approximative utilisée {ram_percent:.1f}%")
-
-                    if ram_percent > ram_limit_fraction * 100:
-                        print(f"Limite mémoire atteinte ({ram_percent:.1f}%), arrêt du traitement")
+                # Fusion immédiate avec la pile
+                if stack:
+                    try:
+                        merged = merge_with_memory_check(stack.pop(), gdf)
+                        stack.append(merged)
+                    except MemoryError as me:
+                        print(me)
                         return None
+                else:
+                    stack.append(gdf)
 
-                    merged = pd.concat([g1, g2], ignore_index=True, sort=False)
-                    stack.append(merged)
+                # Affichage toutes les display_interval secondes
+                now = time.time()
+                if now - last_display >= display_interval:
+                    pct_fusion = processed_count / total_files * 100
+                    ram_percent = current_ram_percent()
+                    print(f"[Mémoire] {ram_percent:.1f}% utilisée, {pct_fusion:.1f}% fichiers traités")
+                    last_display = now
 
             except Exception as e:
-                print(f"Erreur sur {path} : {e}")
+                print(f"[Erreur] sur {path} : {e}")
 
-    # Fusion finale si plusieurs GDF restent
-    while len(stack) > 1:
-        g1 = stack.pop()
-        g2 = stack.pop()
-        merged_mem_estimate = g1.memory_usage(deep=True).sum() + g2.memory_usage(deep=True).sum()
-        ram_percent = current_ram_percent(merged_mem_estimate)
-        print(f"Fusion finale : mémoire approx. {ram_percent:.1f}%")
-        if ram_percent > ram_limit_fraction * 100:
-            print(f"Limite mémoire atteinte ({ram_percent:.1f}%), arrêt")
-            return None
-        merged = pd.concat([g1, g2], ignore_index=True, sort=False)
-        stack.append(merged)
-
+    # Résultat final
     if stack:
         full_gdf = stack[0]
-        print(f"Final DF : {len(full_gdf)} lignes au total")
+        full_mem = full_gdf.memory_usage(deep=True).sum()
+        ram_percent = current_ram_percent(full_mem)
+        print(f"[Final] Fusion complète terminée : {len(full_gdf)} lignes, mémoire approx. {ram_percent:.1f}%")
         return full_gdf
     else:
+        print("[Final] Aucun GDF traité, retour d'un GeoDataFrame vide")
         return gpd.GeoDataFrame()
-
-import boto3
-from credentials import s3
-
-def list_files_onyxia(bucket_name="mgarbe", prefix="BDTOPO/"):
-    paginator = s3.get_paginator('list_objects_v2')
-    files = []
-    for page in paginator.paginate(Bucket=bucket_name, Prefix=prefix, Delimiter='/'):
-        for obj in page.get('Contents', []):
-            if obj['Key'].endswith('.7z'):
-                files.append(obj['Key'])
-
-    return files
