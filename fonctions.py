@@ -1,3 +1,6 @@
+
+# FONCTIONS TELECHARGEMENT BDTOPO TO ONYXIA
+
 import s3fs
 import requests 
 import time
@@ -56,6 +59,73 @@ def download_to_SSPCloud(url, sspcloud_path, max_retries=5):
             print(f"Erreur lors du téléchargement de {url}: {e}")
             return
     print(f"Échec après {max_retries} tentatives pour {url}")
+
+
+
+
+def test_archive_s3(s3_path, bucket="mgarbe"):
+    """Télécharge un fichier .7z depuis S3 et vérifie s'il est corrompu."""
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            local_path = os.path.join(tmpdir, os.path.basename(s3_path))
+            s3.download_file(bucket, s3_path, local_path)
+            with py7zr.SevenZipFile(local_path, mode="r") as z:
+                z.list()  # vérifie les headers
+        return s3_path, False
+    except Exception:
+        return s3_path, True
+
+
+def check_corrompu(paths, max_workers=10, bucket="mgarbe"):
+    """
+    Vérifie en parallèle (sur max_workers cœurs)
+    si les fichiers .7z du bucket S3 sont corrompus.
+    Retourne la liste des fichiers corrompus.
+    """
+    corrupted = []
+
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(test_archive_s3, p, bucket): p for p in paths}
+        for future in as_completed(futures):
+            path, is_corrupted = future.result()
+            if is_corrupted:
+                corrupted.append(path)
+
+    return corrupted
+
+import subprocess
+
+def delete_from_onyxia(paths, bucket="mgarbe"):
+    """
+    Supprime les fichiers listés sur Onyxia dans le bucket SSPCloud.
+    
+    Args:
+        paths (list of str): chemins complets des fichiers à supprimer.
+        bucket (str): nom du bucket Onyxia.
+    """
+    if not paths:
+        print("Aucun fichier à supprimer.")
+        return
+
+    for path in paths:
+        # SSPCloud utilise généralement la commande 'rclone delete' ou 'mc rm'
+        # Ici on suppose rclone, adapte si tu utilises mc ou autre.
+        full_path = f"{bucket}/{path}"
+        try:
+            subprocess.run(["rclone", "delete", full_path], check=True)
+            print(f"Supprimé : {full_path}")
+        except subprocess.CalledProcessError as e:
+            print(f"Erreur suppression {full_path} : {e}")
+
+
+
+
+
+
+
+
+# FONCTIONS TRAITEMENT DONNES
+
 
 
 import boto3
