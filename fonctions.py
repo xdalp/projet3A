@@ -120,7 +120,20 @@ def delete_from_onyxia(paths, bucket="mgarbe"):
 
 
 
+def upload_to_onyxia(local_path, bucket="mgarbe", remote_path="BDTOPO/BDTOPO_BATI_merge.gpkg"):
+    """
+    Envoie un fichier local sur le bucket Onyxia (S3) via boto3.
+    """
+    session = boto3.session.Session()
+    s3 = session.client(
+        service_name='s3',
+        endpoint_url="https://minio.lab.sspcloud.fr",  # endpoint d’Onyxia
+    )
 
+    print(f"[Upload] Envoi de {local_path} vers {bucket}/{remote_path} ...")
+    with open(local_path, "rb") as f:
+        s3.upload_fileobj(f, bucket, remote_path)
+    print("[Upload] Terminé")
 
 
 
