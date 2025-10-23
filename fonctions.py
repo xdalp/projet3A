@@ -398,8 +398,12 @@ def gdf_DBSCAN(gdf, annee, eps=1000, min_samples=3):
     # Application de DBSCAN
     db = DBSCAN(eps=eps, min_samples=min_samples).fit(coords)
     gdf_annee["cluster_id"] = db.labels_
+    labels = db.labels_
 
-    print(f"Clusters détectés : {len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)}")
-    print(f"Bâtiments isolés : {(db.labels_ == -1).sum()}")
+    n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+    n_isoles = np.sum(labels == -1)
 
-    return gdf_annee
+    print(f"Clusters détectés : {n_clusters}")
+    print(f"Bâtiments isolés : {n_isoles}")
+
+    return gdf_annee, n_clusters, n_isoles
