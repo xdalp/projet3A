@@ -34,13 +34,7 @@ files = sorted(files, key=lambda x: int(x.split("_")[1].split(".")[0]))
 print(files)
 
 # Définition des tranches de départements
-ranges = [
-    range(1, 21),   # 1-20
-    range(21, 41),  # 21-40
-    range(41, 61),  # 41-60
-    range(61, 81),  # 61-80
-    range(81, 100)  # 81 et plus
-]
+ranges = [range(start, min(start + 20, 100)) for start in range(1, 100, 20)]
 
 bucket = "mgarbe"
 

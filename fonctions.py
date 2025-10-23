@@ -135,6 +135,34 @@ def upload_to_onyxia(local_path, bucket="mgarbe", remote_path="BDTOPO/BDTOPO_BAT
         s3.upload_fileobj(f, bucket, remote_path)
     print("[Upload] Terminé")
 
+import geopandas as gpd
+
+def load_gpkg(remote_path: str,bucket="mgarbe") -> gpd.GeoDataFrame:
+    """
+    Télécharge un fichier GeoPackage (.gpkg) depuis Onyxia/SSPCloud et le charge dans un GeoDataFrame.
+    """
+    # Création du client S3
+    s3 = boto3.client("s3", endpoint_url="https://minio.lab.sspcloud.fr")
+
+    # Chemin temporaire local
+    local_path = f"/tmp/{os.path.basename(remote_path)}"
+
+    try:
+        # Téléchargement
+        print(f"Téléchargement depuis {bucket}/{remote_path} ...")
+        s3.download_file(bucket, remote_path, local_path)
+
+        # Chargement avec geopandas
+        gdf = gpd.read_file(local_path)
+        print(f"Chargement réussi ({len(gdf)} lignes)")
+
+        return gdf
+
+    except Exception as e:
+        print(f"Erreur lors du chargement : {e}")
+        return None
+
+
 
 
 # FONCTIONS TRAITEMENT DONNES
@@ -272,7 +300,7 @@ def process_file(path, bucket="mgarbe",target_crs="EPSG:2154"):
 import psutil
 
 
-def parallel_process(all_paths, bucket="mgarbe", max_workers=None, target_crs="EPSG:2154", ram_limit_fraction=0.8, display_interval=15):
+def parallel_process(all_paths, bucket="mgarbe", max_workers=10, target_crs="EPSG:2154", ram_limit_fraction=0.8, display_interval=15):
     """
     Charge les fichiers en parallèle et fusionne immédiatement chaque GDF dès qu'il est prêt,
     pour garder la pile (stack) petite et limiter la mémoire utilisée.
@@ -342,3 +370,36 @@ def parallel_process(all_paths, bucket="mgarbe", max_workers=None, target_crs="E
     else:
         print("[Final] Aucun GDF traité, retour d'un GeoDataFrame vide")
         return gpd.GeoDataFrame()
+
+
+
+# FONCTIONS CLUSTERING
+
+import geopandas as gpd
+import pandas as pd
+import numpy as np
+from sklearn.cluster import DBSCAN
+from shapely.geometry import Point
+
+def gdf_DBSCAN(gdf, annee, eps=1000, min_samples=3):
+    """
+    Détecte les clusters de bâtiments pour une année donnée à l’aide de DBSCAN.
+    """
+    gdf_annee = gdf[gdf["Annee"] == annee].copy()
+
+    # Vérifier la projection (Lambert 93 ou autre)
+    if gdf_annee.crs is None or not gdf_annee.crs.is_projected:
+        print("Projection non métrique : reprojection en Lambert-93 (EPSG:2154)")
+        gdf_annee = gdf_annee.to_crs(2154)
+
+    gdf_annee["centroid"] = gdf_annee.geometry.centroid
+    coords = np.vstack([gdf_annee.centroid.x, gdf_annee.centroid.y]).T
+
+    # Application de DBSCAN
+    db = DBSCAN(eps=eps, min_samples=min_samples).fit(coords)
+    gdf_annee["cluster_id"] = db.labels_
+
+    print(f"Clusters détectés : {len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)}")
+    print(f"Bâtiments isolés : {(db.labels_ == -1).sum()}")
+
+    return gdf_annee
