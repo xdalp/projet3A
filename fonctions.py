@@ -431,6 +431,7 @@ def plot_DB_epsilon(gdf,annee,min_samples,eps_min=1,eps_max=1000,eps_pas=20):
         clear_output(wait=True)   # efface la sortie précédente
         print(f'Progress: {i+1}/{len(eps_values)} | eps : {eps}, clusters : {clusters_list[-1]:.3f}, isolés : {isoles_list[-1]:.3f}')
         
+
     # Plot final
     plt.figure(figsize=(10,6))
     plt.plot(eps_values, clusters_list, label="pct en clusters")
