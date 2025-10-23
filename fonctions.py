@@ -381,6 +381,12 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from shapely.geometry import Point
 
+
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import clear_output
+
+
 def gdf_DBSCAN(gdf, annee, eps=1000, min_samples=3):
     """
     Détecte les clusters de bâtiments pour une année donnée à l’aide de DBSCAN.
@@ -407,3 +413,31 @@ def gdf_DBSCAN(gdf, annee, eps=1000, min_samples=3):
     print(f"Bâtiments isolés : {n_isoles}")
 
     return gdf_annee, n_clusters, n_isoles
+
+
+def plot_DB_epsilon(gdf,annee,min_samples,eps_min=1,eps_max=1000,eps_pas=20):
+
+
+    #boucle 
+    eps_values = np.arange(eps_min, eps_max, eps_pas)
+    clusters_list = []
+    isoles_list = []
+
+    for i, eps in enumerate(eps_values):
+        gdf_temp=gdf[gdf["Annee"]==annee].copy()
+        _, n_clusters, n_isoles = gdf_DBSCAN(gdf_temp,annee, eps=eps, min_samples=min_samples)
+        clusters_list.append((len(gdf_temp)-n_isoles)/len(gdf_temp))
+        isoles_list.append(n_isoles/len(gdf_temp))
+        clear_output(wait=True)   # efface la sortie précédente
+        print(f'Progress: {i+1}/{len(eps_values)} | eps : {eps}, clusters : {clusters_list[-1]:.3f}, isolés : {isoles_list[-1]:.3f}')
+        
+    # Plot final
+    plt.figure(figsize=(10,6))
+    plt.plot(eps_values, clusters_list, label="pct en clusters")
+    plt.plot(eps_values, isoles_list, label="pct isolés")
+    plt.xlabel("eps (mètres)")
+    plt.ylabel("Pct")
+    plt.title(f"DBSCAN {annee} pour min_samples={min_samples}")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
