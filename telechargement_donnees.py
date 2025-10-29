@@ -15,7 +15,7 @@ request_text
 page = BeautifulSoup(request_text, "html.parser")
 page
 
-cle="Tous Thèmes par département format Shapefile projection légale"
+cle="Tous Thèmes par département format Shapefile"#projection légale" : ne marche pas pour 2012
 h3_tags = page.find_all("h3")
 h3_tags = [h3 for h3 in h3_tags if cle in h3.get_text()]
 
