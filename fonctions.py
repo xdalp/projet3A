@@ -76,21 +76,18 @@ def test_archive_s3(s3_path, bucket="mgarbe"):
         return s3_path, True
 
 
-def check_corrompu(paths, max_workers=10, bucket="mgarbe"):
-    """
-    Vérifie en parallèle (sur max_workers cœurs)
-    si les fichiers .7z du bucket S3 sont corrompus.
-    Retourne la liste des fichiers corrompus.
-    """
+def check_corrompu(paths, max_workers=10, bucket="mgarbe"): #test corruption sur 10 coeurs
+    from concurrent.futures import ProcessPoolExecutor, as_completed
     corrupted = []
-
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(test_archive_s3, p, bucket): p for p in paths}
         for future in as_completed(futures):
             path, is_corrupted = future.result()
             if is_corrupted:
-                corrupted.append(path)
-
+                # revérifie une fois pour être sûr que ce ne soit pas une erreur de connexion
+                _, confirm = test_archive_s3(path, bucket)
+                if confirm:
+                    corrupted.append(path)
     return corrupted
 
 import subprocess
@@ -265,7 +262,7 @@ def filter_shapefile(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     # Vérifie la présence de D pour déterminer la version
     is_v2 = "USAGE1" in gdf.columns
-    vec=["Annee","Dep","ORIGIN_BAT", "NATURE", "USAGE1", "USAGE2","HAUTEUR","geometry","ETAT","DATE_CREAT","DATE_MAJ","ID_SOURCE","SOURCE"]
+    vec=["ID","Annee","Dep","ORIGIN_BAT", "NATURE", "USAGE1", "USAGE2","HAUTEUR","geometry","ETAT","DATE_CREAT","DATE_MAJ","ID_SOURCE","SOURCE"]
     cols_to_keep = [col for col in vec if col in gdf.columns]
     gdf = gdf[cols_to_keep].copy()
     

@@ -2,17 +2,23 @@ import pandas as pd
 from fonctions import list_files_onyxia, upload_to_onyxia,parallel_process,check_corrompu
 import os 
 
-#files=list_files_onyxia()
+files=list_files_onyxia()
 #files = [
 #    f for f in files
 #    if len(f.split("_")) > 1 and f.split("_")[1].split(".")[0].isdigit() and int(f.split("_")[1].split(".")[0]) < 2
 #]
 
 #TEST EXISTENCE FICHIERS CORROMPUS ()
-#if __name__ == "__main__":
-    # Vérifie leur intégrité
-#    corrompus = check_corrompu(files, max_workers=10, bucket="mgarbe")
-#    print("Fichiers corrompus :", corrompus)
+print("Test corruption")
+if __name__ == "__main__":
+    corrompus = check_corrompu(files, max_workers=10, bucket="mgarbe")  #Vérifie leur intégrité
+    if corrompus:  # True si la liste n'est pas vide
+        import sys
+        sys.exit(f"Arrêt avant fusion : les fichiers corrompus suivant ont été détectés : {corrompus}")
+    else:
+        print("Aucun fichier corrumpu détécté.")
+        print("Début de la fusion...")
+
 
 #print(files)
 #df=parallel_process(files)
