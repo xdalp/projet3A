@@ -1,0 +1,9 @@
+geopandas
+pandas
+numpy
+shapely
+matplotlib
+requests
+beautifulsoup4
+boto3
+py7zr

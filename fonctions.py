@@ -265,10 +265,15 @@ def filter_shapefile(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     vec=["ID","Annee","Dep","ORIGIN_BAT", "NATURE", "USAGE1", "USAGE2","HAUTEUR","geometry","ETAT","DATE_CREAT","DATE_MAJ","ID_SOURCE","SOURCE"]
     cols_to_keep = [col for col in vec if col in gdf.columns]
     gdf = gdf[cols_to_keep].copy()
-    
+
     if is_v2:
-        gdf = gdf[(gdf["NATURE"] == "Industriel, agricole ou commercial")
-            & (gdf["USAGE1"].isin(["Industriel", "Commercial et services"]))]
+        gdf = gdf[
+            (gdf["NATURE"] == "Industriel, agricole ou commercial") & 
+            (
+                gdf["USAGE1"].isin(["Industriel", "Commercial et services"]) #|
+                #gdf["USAGE2"].isin(["Industriel", "Commercial et services"])
+            )
+        ]
     else:
         gdf = gdf[gdf["NATURE"].isin(["Bâtiment commercial", "Bâtiment industriel"])]
 
