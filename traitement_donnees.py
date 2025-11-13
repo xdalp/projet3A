@@ -3,21 +3,21 @@ from fonctions import list_files_onyxia, upload_to_onyxia,parallel_process,check
 import os 
 
 files=list_files_onyxia()
-#files = [
-#    f for f in files
-#    if len(f.split("_")) > 1 and f.split("_")[1].split(".")[0].isdigit() and int(f.split("_")[1].split(".")[0]) < 2
-#]
+files = [
+    f for f in files
+    if len(f.split("_")) > 1 and f.split("_")[1].split(".")[0].isdigit() and int(f.split("_")[1].split(".")[0]) < 2
+]
 
 #TEST EXISTENCE FICHIERS CORROMPUS ()
-print("Test corruption")
-if __name__ == "__main__":
-    corrompus = check_corrompu(files, max_workers=10, bucket="mgarbe")  #Vérifie leur intégrité
-    if corrompus:  # True si la liste n'est pas vide
-        import sys
-        sys.exit(f"Arrêt avant fusion : les fichiers corrompus suivant ont été détectés : {corrompus}")
-    else:
-        print("Aucun fichier corrumpu détécté.")
-        print("Début de la fusion...")
+#print("Test corruption")
+#if __name__ == "__main__":
+#    corrompus = check_corrompu(files, max_workers=10, bucket="mgarbe")  #Vérifie leur intégrité
+#    if corrompus:  # True si la liste n'est pas vide
+#        import sys
+#        sys.exit(f"Arrêt avant fusion : les fichiers corrompus suivant ont été détectés : {corrompus}")
+#    else:
+#        print("Aucun fichier corrumpu détécté.")
+#        print("Début de la fusion...")
 
 
 #print(files)
@@ -34,6 +34,7 @@ files = list_files_onyxia()
 files = [
     f for f in files
     if len(f.split("_")) > 1 and f.split("_")[1].split(".")[0].isdigit()
+    and int(f.split("_")[1].split(".")[0]) == 80 #on ne garde que 80
 ]
 files = sorted(files, key=lambda x: int(x.split("_")[1].split(".")[0]))
 
@@ -59,7 +60,7 @@ for i, dep_range in enumerate(ranges, start=1):
     df = parallel_process(files_range)
 
     # Nom du fichier GeoPackage pour cette tranche
-    output_file = f"BDTOPO_BATI_merge_dep_{dep_range.start}_{dep_range.stop-1}.gpkg"
+    output_file = f"BDTOPO_BATI_merge_dep_{dep_range.start}_{dep_range.stop-1}_test.gpkg"  #ON MET TEST POUR EVITER D'ECRASER
     df.to_file(output_file, driver="GPKG")
 
     # Upload sur Onyxia
