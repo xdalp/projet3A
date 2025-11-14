@@ -278,6 +278,7 @@ def filter_shapefile(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         gdf = gdf[gdf["NATURE"].isin(["Bâtiment commercial", "Bâtiment industriel"])]
 
     gdf = gdf.reset_index(drop=True)
+    gdf = gdf[gdf.geometry.area > 1000] #on ne garde que les obs de plus de 1000m2
     return gdf
 
 

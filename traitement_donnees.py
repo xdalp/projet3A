@@ -41,7 +41,8 @@ files = sorted(files, key=lambda x: int(x.split("_")[1].split(".")[0]))
 print(files)
 
 # Définition des tranches de départements
-ranges = [range(start, min(start + 20, 100)) for start in range(1, 100, 20)]
+#ranges = [range(start, min(start + 20, 100)) for start in range(1, 100, 20)]
+ranges = [range(1, 100)]
 
 bucket = "mgarbe"
 
@@ -60,7 +61,7 @@ for i, dep_range in enumerate(ranges, start=1):
     df = parallel_process(files_range)
 
     # Nom du fichier GeoPackage pour cette tranche
-    output_file = f"BDTOPO_BATI_merge_dep_{dep_range.start}_{dep_range.stop-1}_test.gpkg"  #ON MET TEST POUR EVITER D'ECRASER
+    output_file = f"BDTOPO_BATI_merge_dep_{dep_range.start}_{dep_range.stop-1}_1000m3.gpkg"  #ON MET TEST POUR EVITER D'ECRASER
     df.to_file(output_file, driver="GPKG")
 
     # Upload sur Onyxia
