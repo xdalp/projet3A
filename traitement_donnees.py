@@ -31,11 +31,11 @@ files = [
 
 files = list_files_onyxia()
 # On ne garde que les fichiers des départements < 2 (exemple de filtre)
-files = [
-    f for f in files
-    if len(f.split("_")) > 1 and f.split("_")[1].split(".")[0].isdigit()
-    and int(f.split("_")[1].split(".")[0]) == 80 #on ne garde que 80
-]
+#files = [
+#    f for f in files
+#    if len(f.split("_")) > 1 and f.split("_")[1].split(".")[0].isdigit()
+#    and int(f.split("_")[1].split(".")[0]) == 80 #on ne garde que 80
+#]
 files = sorted(files, key=lambda x: int(x.split("_")[1].split(".")[0]))
 
 print(files)
