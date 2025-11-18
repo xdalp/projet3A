@@ -5,6 +5,7 @@ from credentials import s3
 import requests
 import io
 import time
+from Sitadel2_fonctions import geocode, address
 
 ##################
 #IMPORT DEPUIS ONYXIA
@@ -81,14 +82,22 @@ df1000 = df[
 ]
 
 
+df1000["ANNEE_REELLE_AUTORISATION"] = pd.to_datetime(
+    df1000["DATE_REELLE_AUTORISATION"],
+    dayfirst=True,  
+    errors="coerce"
+).dt.year
+
+df1000 = df1000[
+    (df1000["ANNEE_REELLE_AUTORISATION"].notna()) & 
+    (df1000["ANNEE_REELLE_AUTORISATION"] > 2013)
+].copy()
 
 ################
 # LOCALISATION DES ADRESSES AVEC API BAN
 #################
 
 #df1000=df1000.head(1000).copy() #pour test
-
-print(f"Longueur df :{len(df1000)}")
 
 #conversion code postal en string 
 df1000["ADR_CODPOST_TER"] = (
@@ -98,67 +107,28 @@ df1000["ADR_CODPOST_TER"] = (
     .str.zfill(5)
 )                                             
 
-
 #Construire la colonne adresse
-df1000["adresse"] = (
-    df1000["ADR_NUM_TER"].fillna("").astype(str) + " " +
-    df1000["ADR_TYPEVOIE_TER"].fillna("").astype(str) + " " +
-    df1000["ADR_LIBVOIE_TER"].fillna("").astype(str) + " " +
-    df1000["ADR_LIEUDIT_TER"].fillna("").astype(str) + " " +
-    df1000["ADR_LOCALITE_TER"].fillna("").astype(str) + " " +
-    df1000["ADR_CODPOST_TER"].fillna("").astype(str)
-).str.strip().str.replace(r"\s+", " ", regex=True)
+df1000["adresse"] = df1000.apply(address, axis=1)
 
 
-#csv minimal
-df_export = df1000[["adresse"]].copy()
-csv_bytes = df_export.to_csv(index=False).encode("utf-8")
-
-
-#appel unique de masse
-url = "https://api-adresse.data.gouv.fr/search/csv/"
-
-print("Envoi du CSV à l'API BAN")
-
-response = requests.post(
-    url,
-    files={"data": ("adresses.csv", csv_bytes, "text/csv")},
-    timeout=60
-)
-
-print("Réponse reçue, chargement…")
-
-#Récupérer le CSV résultat dans un DataFrame
-df1000_BAN = pd.read_csv(io.BytesIO(response.content))
-
-
-#Renommer les colonnes importantes
-df1000_BAN = df1000_BAN.rename(columns={
-    "latitude": "lat_BAN",
-    "longitude": "lon_BAN",
-    "result_score": "score_BAN",
-    "result_label": "adresse_BAN",
-})
-
-df1000_BAN = df1000_BAN[[
-    "adresse",
-    "lat_BAN",
-    "lon_BAN",
-    "score_BAN",
-    "adresse_BAN"
-]]
-
-#on ne garde que le matching avec le meilleur score (si pas de num de rue, on a plusieurs entrées)
-df1000_BAN=df1000_BAN.sort_values("score_BAN", ascending=False).drop_duplicates(subset="adresse")
-
-#Fusion des résultats sur l’adresse
-df1000 = df1000.merge(df1000_BAN, on="adresse", how="left")
-
-print("Géocodage massif terminé.")
-
+# REQUETE 1 : TOUTES LES ADRESSES
+df1000=geocode(df1000).copy()
 print(f"{df1000['lat_BAN'].isna().sum()}/{len(df1000)} adresses ne sont pas localisées.")
 
+#REQUETE 2 : ADRESSES NON LOCALISEES 
+for i in range(2,4):
+    temp = df1000[df1000["lat_BAN"].isna()].copy()
+    df1000 = df1000[~df1000["lat_BAN"].isna()].copy()
+    temp["adresse"] = temp.apply(address, axis=1,option=i)
+    temp = temp.drop(columns=["lat_BAN", "lon_BAN", "adresse_BAN", "score_BAN"])
+    temp = geocode(temp).copy()
+    print(f"{temp['lat_BAN'].isna().sum()}/{len(temp)} adresses ne sont pas localisées après une {i}e requête.")
+    print("Exemples :")
+    print(temp.loc[temp["lat_BAN"].isna(), ["adresse_BAN", "adresse"]].head(10))
+    df1000 = pd.concat([df1000, temp], ignore_index=True)
 
+print(f"Supression de {df1000['lat_BAN'].isna().sum()}/{len(df1000)} PC non localisés")
+df1000 = df1000[~df1000["lat_BAN"].isna()].copy()
 
 #tps 
 end_time = time.time()  # fin du chrono
