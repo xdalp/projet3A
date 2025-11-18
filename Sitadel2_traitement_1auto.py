@@ -6,6 +6,7 @@ import requests
 import io
 import time
 from Sitadel2_fonctions import geocode, address
+import re 
 
 ##################
 #IMPORT DEPUIS ONYXIA
@@ -97,7 +98,7 @@ df1000 = df1000[
 # LOCALISATION DES ADRESSES AVEC API BAN
 #################
 
-#df1000=df1000.head(1000).copy() #pour test
+#df1000=df1000.head(5000).copy() #pour test
 
 #conversion code postal en string 
 df1000["ADR_CODPOST_TER"] = (
@@ -109,7 +110,6 @@ df1000["ADR_CODPOST_TER"] = (
 
 #Construire la colonne adresse
 df1000["adresse"] = df1000.apply(address, axis=1)
-
 
 # REQUETE 1 : TOUTES LES ADRESSES
 df1000=geocode(df1000).copy()

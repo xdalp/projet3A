@@ -32,11 +32,11 @@ def address(row, option=1):
 
     #Adresse complère pour requête 1 
     if option == 1:
-        adresse = f"{num} {type_voie} {voie} {lieu} {cp} {localite}"
+        adresse = f"{num} {type_voie} {voie} {cp} {localite}"
 
     #Adresse pour requête 2
     elif option == 2:
-        adresse = f"{num} {type_voie} {voie} {cp} {localite}"
+        adresse = f"{num} {type_voie} {voie} {lieu} {cp} {localite}"
     elif option == 3 :
         adresse=adress_cleaning(f"{num} {type_voie} {voie} {cp} {localite}")
     else:
@@ -44,6 +44,10 @@ def address(row, option=1):
 
     # Nettoyage : supprime les doubles espaces
     adresse = " ".join(adresse.split())
+
+    patterns = [r'\bparc\b', r'\bparc d activite\b', r'\bparc d\'activite\b', r'\bparc activite\b', r'\b\w*parc\w*\b']
+    pattern = "|".join(patterns)
+    adresse = re.sub(pattern, "ZA", adresse, flags=re.IGNORECASE)
 
     return adresse
 
