@@ -1,4 +1,8 @@
 #TRAITEMENT AUTOMATIQUE DE SITADEL2
+import importlib
+import Sitadel2_fonctions
+importlib.reload(Sitadel2_fonctions)
+
 import os
 import pandas as pd
 from credentials import s3
@@ -98,7 +102,7 @@ df1000 = df1000[
 # LOCALISATION DES ADRESSES AVEC API BAN
 #################
 
-#df1000=df1000.head(5000).copy() #pour test
+#df1000=df1000.head(1000).copy() #pour test
 
 #conversion code postal en string 
 df1000["ADR_CODPOST_TER"] = (
@@ -120,7 +124,7 @@ for i in range(2,4):
     temp = df1000[df1000["lat_BAN"].isna()].copy()
     df1000 = df1000[~df1000["lat_BAN"].isna()].copy()
     temp["adresse"] = temp.apply(address, axis=1,option=i)
-    temp = temp.drop(columns=["lat_BAN", "lon_BAN", "adresse_BAN", "score_BAN"])
+    temp = temp.drop(columns=["lat_BAN", "lon_BAN", "adresse_BAN", "score_BAN","code_com_BAN"])
     temp = geocode(temp).copy()
     print(f"{temp['lat_BAN'].isna().sum()}/{len(temp)} adresses ne sont pas localisées après une {i}e requête.")
     print("Exemples :")

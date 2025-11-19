@@ -2,6 +2,16 @@ import io
 import requests
 import pandas as pd
 import re
+import geopandas as gpd
+
+def format_insee(code):
+    if pd.isna(code):
+        return code
+    code_str = str(code).replace(",", ".").strip()  # enlever virgules ou espaces
+    if code_str.isdigit():  # code purement numérique
+        return code_str.zfill(5)
+    else:  # code avec lettres, on laisse tel quel
+        return code_str
 
 def safe_str(x):
     """Convertit NaN en chaîne vide et strippe la valeur."""
@@ -55,7 +65,6 @@ def address(row, option=1):
 
 
 
-
 def geocode(df, adresse_col="adresse"):
     """
     Géocodage massif via API Adresse BAN (endpoint /search/csv/).
@@ -84,6 +93,7 @@ def geocode(df, adresse_col="adresse"):
         "longitude": "lon_BAN",
         "result_score": "score_BAN",
         "result_label": "adresse_BAN",
+        "result_citycode": "code_com_BAN"
     }
 
     df_ban = df_ban.rename(columns=rename_map)
@@ -94,7 +104,8 @@ def geocode(df, adresse_col="adresse"):
         "lat_BAN",
         "lon_BAN",
         "score_BAN",
-        "adresse_BAN"
+        "adresse_BAN",
+        "code_com_BAN",
     ]]
 
     # Si plusieurs résultats, on garde le meilleur score
@@ -108,9 +119,60 @@ def geocode(df, adresse_col="adresse"):
     print(df_ban)
 
     df_loc = df.merge(df_ban, on=adresse_col, how="left")
-
+    df_loc["code_com_BAN"] = df_loc["code_com_BAN"].apply(format_insee)
     print("df_loc")
     print(df_loc)
     print("Fin de la requête")
-
+    
     return df_loc
+
+
+
+def reverse_geocode(temp):
+    """
+    Reverse geocode massif via CSV BAN.
+    temp : GeoDataFrame avec colonnes lat_temp, lon_temp
+    """
+    # Reprojeter pour calcul correct des centroïdes
+    temp_proj = temp.to_crs("EPSG:2154")
+    centroids = temp_proj.geometry.centroid
+    centroids_wgs = gpd.GeoSeries(centroids, crs="EPSG:2154").to_crs("EPSG:4326")
+    temp["lat_temp"] = centroids_wgs.y
+    temp["lon_temp"] = centroids_wgs.x
+
+    # Préparer CSV minimal
+    df_csv = temp[["lat_temp", "lon_temp"]].copy()
+    df_csv = df_csv.rename(columns={"lat_temp": "lat", "lon_temp": "lon"})
+
+    # Convertir en CSV bytes
+    csv_bytes = df_csv.to_csv(index=False).encode("utf-8")
+    files = {"data": ("coords.csv", csv_bytes, "text/csv")}
+    data = {
+        "lat": "lat",
+        "lon": "lon",
+        "result_columns": ["result_postcode", "result_city", "result_score","result_citycode"]
+    }
+    url = "https://api-adresse.data.gouv.fr/reverse/csv/"
+    response = requests.post(url, files=files, data=data, timeout=120)
+
+    # Lire le CSV retourné
+    df_ban = pd.read_csv(io.BytesIO(response.content))
+    print("df_ban")
+    print(df_ban)
+    # Renommer colonnes utiles
+    rename_map = {
+        "result_citycode": "CODE_COM_BDTOPO",
+        "result_postcode":"CODE_POST_BDTOPO",
+        "result_city": "COM_BDTOPO",
+        "result_score": "score_BDTOPO"
+    }
+    df_ban = df_ban.rename(columns=rename_map)
+
+    # Merge avec temp
+    temp = temp.reset_index(drop=True)
+    df_ban = df_ban.reset_index(drop=True)
+    temp = pd.concat([temp, df_ban[["CODE_COM_BDTOPO", "CODE_POST_BDTOPO","COM_BDTOPO", "score_BDTOPO"]]], axis=1)
+    for col in ["CODE_COM_BDTOPO", "CODE_POST_BDTOPO"]:
+        temp[col] = temp[col].apply(lambda x: str(int(x)).zfill(5) if pd.notna(x) else x)
+    return temp
+
