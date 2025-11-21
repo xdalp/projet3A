@@ -64,7 +64,6 @@ def address(row, option=1):
 
 
 
-
 def geocode(df, adresse_col="adresse"):
     """
     Géocodage massif via API Adresse BAN (endpoint /search/csv/).
