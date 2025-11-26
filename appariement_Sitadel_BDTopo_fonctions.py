@@ -1,5 +1,17 @@
 import geopandas as gpd
 import pandas as pd
+from tqdm import tqdm
+
+def run_batch(gdf, batch, batch_num, queue, annee_min=2014, rayon=10):
+    results = []
+
+    for dep in batch:
+        gdf_dep = gdf[gdf["Dep"] == dep]
+        res_dep = nouveaux_batiments(gdf_dep, annee_min, rayon)
+        results.append(res_dep)
+        queue.put(1)
+    return pd.concat(results, ignore_index=True)
+
 
 
 def nouveaux_batiments(gdf, annee_min=2014, rayon=10):
@@ -32,7 +44,7 @@ def nouveaux_batiments(gdf, annee_min=2014, rayon=10):
             
 
             for i, (idx, bat) in enumerate(gdf_annee.iterrows(), 1):
-                print(f"\rTraitement du dep {dep}, année {annee} ; jusqu'ici {nb_nouveaux} nouveaux bâtiments detectés", end="", flush=True)
+                #print(f"\rTraitement du dep {dep}, année {annee} ; jusqu'ici {nb_nouveaux} nouveaux bâtiments detectés", end="", flush=True)
                 # Vérification ID
                 if bat['ID'] in gdf_cumul['ID'].values:
                     continue
