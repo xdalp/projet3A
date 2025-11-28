@@ -1,6 +1,9 @@
 import geopandas as gpd
 import pandas as pd
 from tqdm import tqdm
+import io
+import requests
+import re
 
 def run_batch(gdf, batch, batch_num, queue, annee_min=2014, rayon=10):
     results = []
@@ -186,3 +189,131 @@ def parallel_stock_build(gdf, annee_min=2008, annee_max=2013, rayon=10, n_cpu=No
         stock_df.drop(columns=['Apparition_BDTopo'], inplace=True)
 
     return stock_df
+
+
+def doublons_temp_BDTopo(temp_BDTopo):
+    """
+    Résout les doublons géométriques de temp_BDTopo selon deux cas :
+    
+    CAS 1 : Si un groupe contient des DATE_CREAT NA + non-NA :
+            - on garde une ligne parmi les non-NA
+            - Dep = Dep d'une ligne NA
+            - on supprime les autres lignes du groupe
+            
+    CAS 2 : groupe uniquement NA ou uniquement non-NA :
+            - on garde une ligne (priorité à Annee >= 2019)
+            - Dep = None
+            - on supprime les autres lignes
+            
+    temp_BDTopo est modifié directement.
+    """
+    
+    import pandas as pd
+    
+    # ---- 1. Créer hash géométrique ----
+    temp_BDTopo["geom_hash"] = temp_BDTopo.geometry.apply(lambda g: g.wkb_hex)
+
+    to_drop = []
+    nb_groupes_total = 0
+    nb_groupes_traites = 0
+
+    # ---- 2. Parcours des groupes ----
+    for geom, g in temp_BDTopo.groupby("geom_hash"):
+        
+        if len(g) == 1:
+            continue  # Pas de doublon
+        
+        nb_groupes_total += 1
+        idx = g.index.tolist()
+
+        has_na = g["DATE_CREAT"].isna().any()
+        has_non_na = g["DATE_CREAT"].notna().any()
+
+       #CAS 1
+        if has_na and has_non_na:
+
+            g_na = g[g["DATE_CREAT"].isna()]
+            g_non_na = g[g["DATE_CREAT"].notna()]
+
+            keep = g_non_na.sample(1).index[0]
+            dep_from_na = g_na["Dep"].iloc[0]
+
+            # remplacer Dep
+            temp_BDTopo.at[keep, "Dep"] = dep_from_na
+
+            # supprimer les autres du groupe
+            for drop_idx in idx:
+                if drop_idx != keep:
+                    to_drop.append(drop_idx)
+                    nb_groupes_traites += 1
+
+            continue
+
+        #CAS2
+        g_prior = g[g["Annee"] >= 2019]
+
+        if not g_prior.empty:
+            keep = g_prior.sample(1).index[0]
+        else:
+            keep = g.sample(1).index[0]
+
+        temp_BDTopo.at[keep, "Dep"] = None
+
+        for drop_idx in idx:
+            if drop_idx != keep:
+                to_drop.append(drop_idx)
+                nb_groupes_traites += 1
+
+    temp_BDTopo.drop(index=to_drop, inplace=True)
+    temp_BDTopo.reset_index(drop=True, inplace=True)
+    temp_BDTopo.drop(columns=["geom_hash"], inplace=True)
+
+    print(f"Groupes doublons identifiés : {nb_groupes_total}")
+    print(f"Lignes supprimées : {len(to_drop)}")
+
+    return temp_BDTopo
+
+
+
+
+def fill_dep_BAN(temp_BDTopo):
+    """
+    Complète les NA de la colonne 'Dep' via reverse geocoding BAN.
+    
+    temp_BDTopo : GeoDataFrame avec colonnes 'geometry' et 'Dep'
+    """
+    # Sélection des lignes à traiter
+    temp_na = temp_BDTopo[temp_BDTopo["Dep"].isna()].copy()
+    if temp_na.empty:
+        print("Aucune valeur NA à traiter.")
+        return temp_BDTopo
+
+    # Reprojeter pour calcul correct des centroïdes
+    temp_proj = temp_na.to_crs("EPSG:2154")
+    centroids = temp_proj.geometry.centroid
+    centroids_wgs = gpd.GeoSeries(centroids, crs="EPSG:2154").to_crs("EPSG:4326")
+    temp_na["lat_temp"] = centroids_wgs.y
+    temp_na["lon_temp"] = centroids_wgs.x
+
+    # Préparer CSV minimal pour l'API
+    df_csv = temp_na[["lat_temp", "lon_temp"]].rename(columns={"lat_temp":"lat", "lon_temp":"lon"})
+    csv_bytes = df_csv.to_csv(index=False).encode("utf-8")
+    files = {"data": ("coords.csv", csv_bytes, "text/csv")}
+    data = {
+        "lat": "lat",
+        "lon": "lon",
+        "result_columns": ["result_postcode"]
+    }
+
+    url = "https://api-adresse.data.gouv.fr/reverse/csv/"
+    response = requests.post(url, files=files, data=data, timeout=300)  # timeout plus long si gros CSV
+    df_ban = pd.read_csv(io.BytesIO(response.content))
+
+    # Remplir la colonne Dep directement dans temp_BDTopo
+    temp_BDTopo.loc[temp_na.index, "Dep"] = df_ban["result_postcode"].values
+    codes = temp_BDTopo.loc[temp_na.index, "Dep"].astype(str).str.zfill(5)
+    codes_clean = codes.str.extract(r'(\d{5})')[0]  # capture uniquement 5 chiffres consécutifs
+    temp_BDTopo.loc[temp_na.index, "Dep"] = codes_clean.str[:2].astype("Int64")
+    
+    print(f"Complété {len(temp_na)} valeurs NA de 'Dep'.")
+    return temp_BDTopo
