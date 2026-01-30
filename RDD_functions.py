@@ -2,6 +2,7 @@ import pandas as pd
 import statsmodels.formula.api as smf
 import matplotlib.pyplot as plt
 import seaborn as sns
+import requests
 
 def compute_rdd(df, outcome_var, running_var='delta_score_1', cutoff=0):
     """
@@ -43,3 +44,6 @@ def plot_rdd(df, outcome_var, running_var='delta_score_1', cutoff=0):
         plt.ylabel(outcome_var)
         plt.legend()
         plt.show()
+
+
+
