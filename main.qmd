@@ -1,0 +1,33 @@
+---
+title: "RDD"
+author: "Caroline Lebrun-Sabalot, Pierre Ripoll, Matéo Garbe"
+format:
+  html:
+    toc: true
+    theme: cosmo
+execute: 
+    echo: false
+jupyter: python3
+---
+
+```{python}
+#| output: false
+!pip install -r requirements.txt
+
+```
+
+# Balanced Checks 
+
+::: {.panel-tabset}
+
+## RDD1
+
+```{python}
+
+```
+
+
+## RDD2
+
+
+:::
