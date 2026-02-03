@@ -3,23 +3,23 @@ import statsmodels.formula.api as smf
 import matplotlib.pyplot as plt
 import seaborn as sns
 import requests
+import rdrobust
 
-def compute_rdd(df, outcome_var, running_var='delta_score_1', cutoff=0):
-    """
-    Calcule un RDD linéaire pour chaque élection.
-    """
-    results = {}
-    for e in df['election'].unique():
-        df_e = df[df['election'] == e].copy()
-        df_e['treatment'] = (df_e[running_var] >= cutoff).astype(int)
+def compute_rdd(df, outcome_var, running_var='delta_score_1', cutoff=0, election = "2014_muni"):
+
+# df,annee, type_kernel = "uni", bandwith_value = None):
+# Sharp RDD
+    df_rdd = df[df['election'] == election]
+
+    res = rdrobust.rdrobust(
+        y=df_rdd[outcome_var],
+        x=df_rdd[running_var],
+        #kernel = type_kernel,
+        c = cutoff
+        #,h = bandwith_value
+    )
         
-        # OLS linéaire RDD
-        formula = f"{outcome_var} ~ treatment + {running_var}"
-        model = smf.ols(formula, data=df_e).fit()
-        
-        results[e] = model.summary()
-        
-    return results
+    return res
 
 
 def plot_rdd(df, outcome_var, running_var='delta_score_1', cutoff=0):
@@ -47,3 +47,13 @@ def plot_rdd(df, outcome_var, running_var='delta_score_1', cutoff=0):
 
 
 
+
+def plot_rdd_package(df, outcome_var, running_var='delta_score_1', election = "2014_muni"):
+    df_rdd = df[df['election'] == election]
+    figure_rdd = rdrobust.rdplot(y=df_rdd[outcome_var],
+                    x=df_rdd[running_var],
+                    ci=95,
+                    y_label= outcome_var,
+                    x_label=running_var)
+
+    return(figure_rdd)
