@@ -3,10 +3,10 @@ import s3fs
 import requests 
 import time
 import re
-import credentials
+#import credentials
 import importlib
-importlib.reload(credentials)
-from credentials import s3
+#importlib.reload(credentials)
+#from credentials import s3
 import botocore
 from botocore.exceptions import ClientError
 
