@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import os
-from BDTopo_fonctions import download_to_SSPCloud
+from basic_functions import download_to_SSPCloud
 
 url_BDTOPO = "https://geoservices.ign.fr/bdtopo"
 
