@@ -10,3 +10,4 @@ py7zr
 rtree
 xlrd
 openpyxl
+rdrobust
