@@ -1,3 +1,8 @@
+'''
+Ce code permet de créer une base avec toutes les communes des deux elections, 
+leurs scores et nos var d'intérêt
+'''
+
 import os 
 import pandas as pd
 from functions.s3_connexion import get_s3
