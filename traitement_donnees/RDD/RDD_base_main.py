@@ -1,7 +1,7 @@
 import os 
 import pandas as pd
-from fonctions.s3_connexion import get_s3
-from fonctions.basic_functions import load_gpkg, upload_to_onyxia
+from functions.s3_connexion import get_s3
+from functions.basic_functions import load_gpkg, upload_to_onyxia
 
 ########### IMPORTS #############
 

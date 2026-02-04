@@ -3,7 +3,7 @@ import s3fs
 import requests 
 import time
 from botocore.exceptions import ClientError
-from fonctions.s3_connexion import get_s3
+from functions.s3_connexion import get_s3
 
 #initialisation de s3
 s3=get_s3()

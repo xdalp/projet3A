@@ -1,5 +1,5 @@
 import pandas as pd
-from fonctions.s3_connexion import get_s3
+from functions.s3_connexion import get_s3
 
 
 #IDENTIFIANTS COMMUNES RDD
