@@ -19,7 +19,7 @@ library(reticulate)
 
 ```{r}
 # Charger les fonctions
-source("projet3A/functions/RDD_functions.R")
+source("projet3A/functions/main_functions.R")
 
 # Télécharger le CSV
 remote_path <- "RDD/df_RDD_main_BC_full.csv"
