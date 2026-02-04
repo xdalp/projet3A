@@ -8,19 +8,32 @@ format:
 execute: 
     echo: false
 ---
+```{r}
+packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust")
 
+# Installer seulement ceux qui ne sont pas déjà installés
+install_if_missing <- function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg)
+  }
+}
+
+lapply(packages, install_if_missing)
+```
 
 ```{r}
 #| output: false
 library(ggplot2)
 library(dplyr)
 library(reticulate)
+library(dotenv)
 ```
 
 ```{r}
 # Charger les fonctions
 source("projet3A/functions/main_functions.R")
-
+#commenter la ligne ci-dessous si Matéo
+dotenv::load_dot_env("projet3A/.env")
 # Télécharger le CSV
 remote_path <- "RDD/df_RDD_main_BC_full.csv"
 gdf_RDD<-get_s3_csv("mgarbe",remote_path)
@@ -52,7 +65,7 @@ plot_rdd(gdf_RDD_seuil, outcome_var='BC_pop',e='2014_muni')
 
 ### 2020
 
-```{python}
+```{r}
 plot_rdd(gdf_RDD_seuil, outcome_var='BC_pop',e='2020_muni')
 ```
 
@@ -64,13 +77,13 @@ plot_rdd(gdf_RDD_seuil, outcome_var='BC_pop',e='2020_muni')
 
 ### 2014
 
-```{python}
+```{r}
 plot_rdd(gdf_RDD_seuil, outcome_var='BC_dens_pop',e='2014_muni')
 ```
 
 ### 2020
 
-```{python}
+```{r}
 plot_rdd(gdf_RDD_seuil, outcome_var='BC_dens_pop',e='2020_muni')
 ```
 
@@ -82,13 +95,13 @@ plot_rdd(gdf_RDD_seuil, outcome_var='BC_dens_pop',e='2020_muni')
 
 ### 2014
 
-```{python}
+```{r}
 plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_chom',e='2014_muni')
 ```
 
 ### 2020
 
-```{python}
+```{r}
 plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_chom',e='2020_muni')
 ```
 
@@ -100,13 +113,13 @@ plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_chom',e='2020_muni')
 
 ### 2014
 
-```{python}
+```{r}
 plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_emploi',e='2014_muni')
 ```
 
 ### 2020
 
-```{python}
+```{r}
 plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_emploi',e='2020_muni')
 ```
 
