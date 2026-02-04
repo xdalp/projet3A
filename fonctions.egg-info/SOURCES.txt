@@ -3,6 +3,7 @@ setup.py
 fonctions/RDD_functions.py
 fonctions/__init__.py
 fonctions/basic_functions.py
+fonctions/s3_connexion.py
 fonctions/vote_functions.py
 fonctions.egg-info/PKG-INFO
 fonctions.egg-info/SOURCES.txt

@@ -1,17 +1,14 @@
-import importlib
-import credentials
-importlib.reload(credentials)
 import os 
 import pandas as pd
-from BDTopo_fonctions import load_gpkg
-from BDTopo_fonctions import upload_to_onyxia
+from fonctions.s3_connexion import get_s3
+from fonctions.basic_functions import load_gpkg, upload_to_onyxia
 
 ########### IMPORTS #############
 
 #données vote
 remote_path="Elections/donnees_duel_maires_wide.csv"
 local_path = f"/tmp/{os.path.basename(remote_path)}"
-credentials.s3.download_file("mgarbe", remote_path, local_path)
+get_s3().download_file("mgarbe", remote_path, local_path)
 df_vote=pd.read_csv(local_path, sep=",")
 df_vote=df_vote[['id_election','rang1_Nuance','rang2_Nuance','rang1_voix_pct','rang2_voix_pct','election',
 'tour','annee','dep_x','Nuance_interco','Code INSEE','Code Postal']].copy()
@@ -19,7 +16,7 @@ df_vote=df_vote[['id_election','rang1_Nuance','rang2_Nuance','rang1_voix_pct','r
 #codes nuances politiques
 remote_path="Elections/nuances.csv"
 local_path = f"/tmp/{os.path.basename(remote_path)}"
-credentials.s3.download_file("mgarbe", remote_path, local_path)
+get_s3().download_file("mgarbe", remote_path, local_path)
 nuances=pd.read_csv(local_path, sep=",")
 
 #données géographiques

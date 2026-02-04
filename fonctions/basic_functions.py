@@ -2,14 +2,11 @@
 import s3fs
 import requests 
 import time
-import re
-#import credentials
-import importlib
-#importlib.reload(credentials)
-#from credentials import s3
-import botocore
 from botocore.exceptions import ClientError
+from fonctions.s3_connexion import get_s3
 
+#initialisation de s3
+s3=get_s3()
 
 def download_to_SSPCloud(url, sspcloud_path, max_retries=5):
     """
@@ -173,7 +170,7 @@ import tempfile
 import os
 import py7zr 
 import glob
-from credentials import s3
+#from credentials import s3
 
 def load_shapefile(path, bucket="mgarbe", region=""):
     """
@@ -237,7 +234,7 @@ def load_shapefile(path, bucket="mgarbe", region=""):
     return gdf
 
 import boto3
-from credentials import s3
+#from credentials import s3
 def list_files_onyxia(bucket_name="mgarbe", prefix="BDTOPO/"):
     paginator = s3.get_paginator('list_objects_v2')
     files = []

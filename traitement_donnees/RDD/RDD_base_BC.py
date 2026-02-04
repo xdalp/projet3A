@@ -1,8 +1,5 @@
 import pandas as pd
-import importlib
-import credentials
-importlib.reload(credentials)
-import os 
+from fonctions.s3_connexion import get_s3
 
 
 #IDENTIFIANTS COMMUNES RDD
@@ -18,8 +15,7 @@ id_communes['ann_BC'] = id_communes['election'].map({
     '2020_muni': 2016
 })
 
-
-files_BC=credentials.s3.list_objects_v2(Bucket="mgarbe", Prefix="Elections/")["Contents"]
+files_BC=get_s3().list_objects_v2(Bucket="mgarbe", Prefix="Elections/")["Contents"]
 
 dfs = {}  # dictionnaire pour stocker les DataFrames
 
@@ -31,7 +27,7 @@ for f in files_BC:
         local_path = f"/tmp/{fname}"
         
         # Télécharger le fichier
-        credentials.s3.download_file("mgarbe", f["Key"], local_path)
+        s3.download_file("mgarbe", f["Key"], local_path)
         
         # Lire CSV
         dfs[f"df_{suffix}"] = pd.read_csv(local_path, sep=None, engine="python")
