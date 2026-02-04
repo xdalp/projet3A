@@ -12,7 +12,7 @@ def detecter_ligne_header(fichier, mot_cle="Critère d'export", limite=15):
 
 
 
-def simplifier_prenom_test(text):
+def simplifier_prenom(text):
     if pd.isna(text):
         return None   # ou "" ou text
     # Normalise en forme NFD (décompose les accents)
