@@ -8,8 +8,13 @@ format:
 execute: 
     echo: false
 ---
+
+
 ```{r}
-packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv")
+#| echo: false
+#| output: false
+
+packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv","plotly")
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -22,16 +27,22 @@ lapply(packages, install_if_missing)
 ```
 
 ```{r}
+#| echo: false
 #| output: false
+
 library(ggplot2)
 library(dplyr)
 library(reticulate)
 library(dotenv)
+library(plotly)
 ```
 
 ```{r}
+#| echo: false
+#| output: false
+
 # Charger les fonctions
-source("projet3A/functions/main_functions.R")
+source("functions/main_functions.R")
 
 #chargement des var d'env pour Caro
 if (file.exists("projet3A/.env")) {
@@ -47,6 +58,7 @@ gdf_RDD<-get_s3_csv("mgarbe",remote_path)
 # Balanced Checks 
 
 ```{r}
+#| echo: false
 #| output: false
 
 #récupérer l'objet Python
@@ -56,76 +68,24 @@ gdf_RDD_seuil <- gdf_RDD %>%filter(abs(delta_score_1) < seuil)
 
 ::: {.panel-tabset}
 
-
-## Population
-
-::: {.columns}
-
-### 2014
-
 ```{r}
-plot_rdd(gdf_RDD_seuil, outcome_var='BC_pop',e='2014_muni')
+#| echo: false
+#| results: asis
+#| warning: false
+
+# Variables BC
+bc_vars <- grep("^BC_", names(gdf_RDD_seuil), value = TRUE)
+tab_names <- c("Population", "Densité de population", "Chômage", "Emploi")
+stopifnot(length(bc_vars) == length(tab_names))
+
+for (i in seq_along(bc_vars)) {
+  # Titre de l'onglet
+  cat(paste0("## ", tab_names[i], "\n\n"))
+  p <- plot_rdd(gdf_RDD_seuil, outcome_var = bc_vars[i])
+  print(p)
+  cat("\n\n")
+}
+
 ```
 
-### 2020
-
-```{r}
-plot_rdd(gdf_RDD_seuil, outcome_var='BC_pop',e='2020_muni')
-```
-
-:::
-
-## Densité de population
-
-::: {.columns}
-
-### 2014
-
-```{r}
-plot_rdd(gdf_RDD_seuil, outcome_var='BC_dens_pop',e='2014_muni')
-```
-
-### 2020
-
-```{r}
-plot_rdd(gdf_RDD_seuil, outcome_var='BC_dens_pop',e='2020_muni')
-```
-
-:::
-
-## Chômage
-
-::: {.columns}
-
-### 2014
-
-```{r}
-plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_chom',e='2014_muni')
-```
-
-### 2020
-
-```{r}
-plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_chom',e='2020_muni')
-```
-
-:::
-
-## Emploi
-
-::: {.columns}
-
-### 2014
-
-```{r}
-plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_emploi',e='2014_muni')
-```
-
-### 2020
-
-```{r}
-plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_emploi',e='2020_muni')
-```
-
-:::
 :::

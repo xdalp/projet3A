@@ -49,28 +49,27 @@ compute_rdd <- function(df,
 
 
 
-
-plot_rdd <- function(df_e, outcome_var,running_var = "delta_score_1",cutoff = 0) {
-df_e <- df %>%
-  ggplot(df_e, aes_string(x = running_var, y = outcome_var)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    data = df_e %>% filter(.data[[running_var]] < cutoff),
-    method = "lm",
-    se = FALSE,
-    color = "red") + 
-  geom_smooth(
-      data = df_e %>% filter(.data[[running_var]] >= cutoff),
+plot_rdd <- function(df, outcome_var, running_var = "delta_score_1", cutoff = 0) {
+  p <- ggplot(df, aes_string(x = running_var, y = outcome_var)) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(
+      data = df %>% filter(.data[[running_var]] < cutoff),
       method = "lm",
-      se = FALSE,
+      se = TRUE,
+      color = "red"
+    ) +
+    geom_smooth(
+      data = df %>% filter(.data[[running_var]] >= cutoff),
+      method = "lm",
+      se = TRUE,
       color = "blue"
     ) +
-  geom_vline(xintercept = cutoff, linetype = "dashed") +
-  labs(
-      title = paste0("RDD - Election ", e, " (", outcome_var, ")"),
-      x = running_var,
-      y = outcome_var
+    geom_vline(xintercept = cutoff, linetype = "dashed") +
+    labs(
+      x = "Ecart de score",
+      y=""
     ) +
-  facet_wrap(election)
-  theme_minimal()
+    facet_wrap(~election, labeller = as_labeller(c("2014_muni"="2014","2020_muni"="2020"))) +
+    theme_minimal()
+  return(p)
 }
