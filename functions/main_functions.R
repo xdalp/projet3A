@@ -50,43 +50,27 @@ compute_rdd <- function(df,
 
 
 
-plot_rdd <- function(df,
-                     outcome_var,
-                     e,
-                     running_var = "delta_score_1",
-                     cutoff = 0) {
-
-  # Filtrage par élection
-  df_e <- df %>%
-            filter(election == e)
-
+plot_rdd <- function(df_e, outcome_var,running_var = "delta_score_1",cutoff = 0) {
+df_e <- df %>%
   ggplot(df_e, aes_string(x = running_var, y = outcome_var)) +
-        geom_point(alpha = 0.5) +
-
-    # Ajustement à gauche du cutoff
-    geom_smooth(
-      data = df_e %>% filter(.data[[running_var]] < cutoff),
-      method = "lm",
-      se = FALSE,
-      color = "red"
-    ) +
-    # Ajustement à droite du cutoff
-    geom_smooth(
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    data = df_e %>% filter(.data[[running_var]] < cutoff),
+    method = "lm",
+    se = FALSE,
+    color = "red") + 
+  geom_smooth(
       data = df_e %>% filter(.data[[running_var]] >= cutoff),
       method = "lm",
       se = FALSE,
       color = "blue"
     ) +
-
-    # Ligne verticale au cutoff
-    geom_vline(xintercept = cutoff, linetype = "dashed") +
-
-    labs(
+  geom_vline(xintercept = cutoff, linetype = "dashed") +
+  labs(
       title = paste0("RDD - Election ", e, " (", outcome_var, ")"),
       x = running_var,
       y = outcome_var
     ) +
-    theme_minimal()
+  facet_wrap(election)
+  theme_minimal()
 }
-
-
