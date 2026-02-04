@@ -7,40 +7,34 @@ format:
     theme: cosmo
 execute: 
     echo: false
-jupyter: python3
 ---
 
-```{python}
+
+```{r}
 #| output: false
-import os 
-import pandas as pd
-from functions.basic_functions import load_gpkg
-from functions.s3_connexion import get_s3
-import functions.RDD_functions
-import importlib
-importlib.reload(functions.RDD_functions)
-from functions.RDD_functions import plot_rdd 
+library(ggplot2)
+library(dplyr)
+library(reticulate)
+```
+
+```{r}
+# Charger les fonctions
+source("projet3A/functions/RDD_functions.R")
+
+# Télécharger le CSV
+remote_path <- "RDD/df_RDD_main_BC_full.csv"
+gdf_RDD_csv<-get_s3("mgarbe",remote_path)
+
 ```
 
 # Balanced Checks 
 
-```{python}
+```{r}
 #| output: false
 
-#vote
-remote_path="RDD/df_RDD_main_BC_full.csv"
-local_path = f"/tmp/{os.path.basename(remote_path)}"
-get_s3().download_file("mgarbe", remote_path, local_path)
-gdf_RDD=pd.read_csv(local_path, sep=";")
-
-```
-
-```{python}
-#| output: false
-seuil=8
-gdf_RDD_seuil=gdf_RDD[abs(gdf_RDD["delta_score_1"])<seuil].copy()
-print(f"Variables dispo pour BC : {[col for col in gdf_RDD_seuil.columns if col.startswith("BC_")]}")
-
+#récupérer l'objet Python
+seuil <- 8
+gdf_RDD_seuil <- gdf_RDD %>%filter(abs(delta_score_1) < seuil)
 ```
 
 ::: {.panel-tabset}

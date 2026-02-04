@@ -11,3 +11,5 @@ rtree
 xlrd
 openpyxl
 rdrobust
+IPython
+seaborn
