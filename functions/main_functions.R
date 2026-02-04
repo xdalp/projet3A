@@ -30,19 +30,20 @@ get_s3_csv <- function(bucket,file_key) {
 
 compute_rdd <- function(df,
                         outcome_var,
+                        kernel_choisi = "uni",
+                        election_choisie,
                         running_var = "delta_score_1",
                         cutoff = 0,
-                        election = "2014_muni") {
-
+                        cov_choisis = NULL) {
   # Filtrage sur l'élection choisie
-  df_rdd <- df %>%
-            filter(election == election)
+  df_rdd <- df %>% filter(election == election_choisie)
 
   # Appel à rdrobust
   res <- rdrobust(y = df_rdd[[outcome_var]],
-                    x = df_rdd[[running_var]],
-                    c = cutoff
-                )
+                  x = df_rdd[[running_var]],
+                  c = cutoff,
+                  covs = cov_choisis,
+                  kernel = kernel_choisi)
 
   return(res)
   }

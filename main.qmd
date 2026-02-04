@@ -1,6 +1,7 @@
 ---
 title: "main"
 author: "Caroline Lebrun-Sabalot, Pierre Ripoll, Matéo Garbe"
+server: shiny
 format:
   html:
     toc: true
@@ -14,7 +15,7 @@ execute:
 #| echo: false
 #| output: false
 
-packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv","plotly")
+packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv","plotly","shiny")
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -35,11 +36,13 @@ library(dplyr)
 library(reticulate)
 library(dotenv)
 library(plotly)
+library(shiny)
 ```
 
 ```{r}
 #| echo: false
 #| output: false
+#| context: setup
 
 # Charger les fonctions
 source("functions/main_functions.R")
@@ -60,6 +63,7 @@ gdf_RDD<-get_s3_csv("mgarbe",remote_path)
 ```{r}
 #| echo: false
 #| output: false
+#| context: data
 
 #récupérer l'objet Python
 seuil <- 8
@@ -86,6 +90,106 @@ for (i in seq_along(bc_vars)) {
   cat("\n\n")
 }
 
+```
+
+:::
+
+# Régressions
+
+```{r}
+#| panel: sidebar
+kernels <- c("uni", "tri")
+variables <- c("surface_creee")
+radioButtons("k", "Choix du kernel", choices = kernels, selected = kernels[[1]], inline = TRUE)
+radioButtons("var", "Choix de la variable", choices = variables, selected = variables[[1]], inline = TRUE)
+```
+
+::: {.panel-tabset}
+
+## Plot
+```{r}
+#| panel: fill
+plotOutput("plot_rdd")
+```
+
+
+## Table
+
+```{r}
+#| panel: fill
+verbatimTextOutput("rdd_result")
+```
+
+:::
+
+```{r}
+#| context: server
+
+#table
+rdd_res <- reactive({
+  compute_rdd(
+    gdf_RDD_seuil,
+    outcome_var = input$var,
+    kernel_choisi = input$k,
+    election_choisie = "2014_muni"
+  )
+})
+
+output$rdd_result <- renderPrint({
+  res <- rdd_res()
+  cat("Estimate :", res$Estimate, "\n")
+  cat("p-value :", res$pv, "\n")
+})
+
+#plot
+p<- reactive({
+  plot_rdd(gdf_RDD_seuil, 
+  outcome_var = input$var)
+}
+)
+
+output$plot_rdd <- renderPlot({p()})
+
+```
+
+
+
+::: {.panel-tabset}
+
+## Avec kernel uniforme
+```{r}
+#| echo: false
+rdd_unif = compute_rdd(gdf_RDD_seuil,
+                        outcome_var = "surface_creee", 
+                        kernel_choisi = "uni",
+                        election = "2020_muni")
+rdd_unif$Estimate
+rdd_unif$pv
+```
+
+
+## Avec kernel triangulaire
+```{r}
+#| echo: false
+rdd_tri = compute_rdd(gdf_RDD_seuil,
+                        outcome_var = "surface_creee", 
+                        kernel_choisi = "tri",
+                        election_choisie = "2014_muni")
+print(rdd_tri)
+rdd_tri$Estimate
+rdd_tri$pv
+```
+
+
+## Avec kernel uniforme
+```{r}
+#| echo: false
+rdd_unif = compute_rdd(gdf_RDD_seuil,
+                        outcome_var = "surface_creee", 
+                        kernel_choisi = "uni",
+                        election_choisie = "2014_muni")
+rdd_unif$Estimate
+rdd_unif$pv
 ```
 
 :::
