@@ -9,7 +9,7 @@ execute:
     echo: false
 ---
 ```{r}
-packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust")
+packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv")
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -32,8 +32,12 @@ library(dotenv)
 ```{r}
 # Charger les fonctions
 source("projet3A/functions/main_functions.R")
-#commenter la ligne ci-dessous si Matéo
-dotenv::load_dot_env("projet3A/.env")
+
+#chargement des var d'env pour Caro
+if (file.exists("projet3A/.env")) {
+  dotenv::load_dot_env("projet3A/.env")
+} 
+
 # Télécharger le CSV
 remote_path <- "RDD/df_RDD_main_BC_full.csv"
 gdf_RDD<-get_s3_csv("mgarbe",remote_path)
