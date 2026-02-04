@@ -9,7 +9,7 @@ execute:
     echo: false
 ---
 ```{r}
-packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv")
+packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust")
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -32,12 +32,8 @@ library(dotenv)
 ```{r}
 # Charger les fonctions
 source("projet3A/functions/main_functions.R")
-
-#chargement des var d'env pour Caro
-if (file.exists("projet3A/.env")) {
-  dotenv::load_dot_env("projet3A/.env")
-} 
-
+#commenter la ligne ci-dessous si Matéo
+dotenv::load_dot_env("projet3A/.env")
 # Télécharger le CSV
 remote_path <- "RDD/df_RDD_main_BC_full.csv"
 gdf_RDD<-get_s3_csv("mgarbe",remote_path)
@@ -125,6 +121,47 @@ plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_emploi',e='2014_muni')
 
 ```{r}
 plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_emploi',e='2020_muni')
+```
+
+
+# Régressions
+
+## Avec kernel uniforme
+```{r}
+rdd_unif = compute_rdd(gdf_RDD_seuil,
+                        outcome_var = "surface_creee", 
+                        kernel_choisi = "uni",
+                        election = "2020_muni")
+rdd_unif$Estimate
+rdd_unif$pv
+```
+
+
+## Avec kernel triangulaire
+```{r}
+rdd_tri = compute_rdd(gdf_RDD_seuil,
+                        outcome_var = "surface_creee", 
+                        kernel_choisi = "tri",
+                        election = "2014_muni")
+print(rdd_tri)
+rdd_tri$Estimate
+rdd_tri$pv
+```
+
+
+```{r}
+
+head(gdf_RDD_seuil%>%filter(election=="2020_muni"))
+```
+
+
+## Avec kernel uniforme
+```{r}
+rdd_unif = compute_rdd(gdf_RDD_seuil,
+                        outcome_var = "surface_creee", 
+                        kernel_choisi = "uni")
+rdd_unif$Estimate
+rdd_unif$pv
 ```
 
 :::
