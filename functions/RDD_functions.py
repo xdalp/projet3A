@@ -22,28 +22,25 @@ def compute_rdd(df, outcome_var, running_var='delta_score_1', cutoff=0, election
     return res
 
 
-def plot_rdd(df, outcome_var, running_var='delta_score_1', cutoff=0):
+def plot_rdd(df, outcome_var, e, running_var='delta_score_1', cutoff=0):
     """
     Produit un graphique RDD gauche/droite pour chaque élection.
+    Prend e en input
     """
-    elections = df['election'].unique()
+    df_e = df[df['election'] == e]
+    plt.figure(figsize=(8,5))
+    sns.scatterplot(x=running_var, y=outcome_var, data=df_e, alpha=0.5)
+    sns.regplot(x=running_var, y=outcome_var, data=df_e[df_e[running_var] < cutoff],
+                scatter=False, label='Left fit', color='red')
+    sns.regplot(x=running_var, y=outcome_var, data=df_e[df_e[running_var] >= cutoff],
+                scatter=False, label='Right fit', color='blue')
     
-    for e in elections:
-        df_e = df[df['election'] == e]
-        
-        plt.figure(figsize=(8,5))
-        sns.scatterplot(x=running_var, y=outcome_var, data=df_e, alpha=0.5)
-        sns.regplot(x=running_var, y=outcome_var, data=df_e[df_e[running_var] < cutoff],
-                    scatter=False, label='Left fit', color='red')
-        sns.regplot(x=running_var, y=outcome_var, data=df_e[df_e[running_var] >= cutoff],
-                    scatter=False, label='Right fit', color='blue')
-        
-        plt.axvline(cutoff, color='black', linestyle='--')
-        plt.title(f'RDD - Election {e} ({outcome_var})')
-        plt.xlabel(running_var)
-        plt.ylabel(outcome_var)
-        plt.legend()
-        plt.show()
+    plt.axvline(cutoff, color='black', linestyle='--')
+    plt.title(f'RDD - Election {e} ({outcome_var})')
+    plt.xlabel(running_var)
+    plt.ylabel(outcome_var)
+    plt.legend()
+    plt.show()
 
 
 

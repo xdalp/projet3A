@@ -1,5 +1,5 @@
 ---
-title: "RDD"
+title: "main"
 author: "Caroline Lebrun-Sabalot, Pierre Ripoll, Matéo Garbe"
 format:
   html:
@@ -12,22 +12,109 @@ jupyter: python3
 
 ```{python}
 #| output: false
-!pip install -r requirements.txt
-
+import os 
+import pandas as pd
+from functions.basic_functions import load_gpkg
+from functions.s3_connexion import get_s3
+import functions.RDD_functions
+import importlib
+importlib.reload(functions.RDD_functions)
+from functions.RDD_functions import plot_rdd 
 ```
 
 # Balanced Checks 
 
-::: {.panel-tabset}
-
-## RDD1
-
 ```{python}
+#| output: false
+
+#vote
+remote_path="RDD/df_RDD_main_BC_full.csv"
+local_path = f"/tmp/{os.path.basename(remote_path)}"
+get_s3().download_file("mgarbe", remote_path, local_path)
+gdf_RDD=pd.read_csv(local_path, sep=";")
 
 ```
 
+```{python}
+#| output: false
+seuil=8
+gdf_RDD_seuil=gdf_RDD[abs(gdf_RDD["delta_score_1"])<seuil].copy()
+print(f"Variables dispo pour BC : {[col for col in gdf_RDD_seuil.columns if col.startswith("BC_")]}")
 
-## RDD2
+```
+
+::: {.panel-tabset}
 
 
+## Population
+
+::: {.columns}
+
+### 2014
+
+```{python}
+plot_rdd(gdf_RDD_seuil, outcome_var='BC_pop',e='2014_muni')
+```
+
+### 2020
+
+```{python}
+plot_rdd(gdf_RDD_seuil, outcome_var='BC_pop',e='2020_muni')
+```
+
+:::
+
+## Densité de population
+
+::: {.columns}
+
+### 2014
+
+```{python}
+plot_rdd(gdf_RDD_seuil, outcome_var='BC_dens_pop',e='2014_muni')
+```
+
+### 2020
+
+```{python}
+plot_rdd(gdf_RDD_seuil, outcome_var='BC_dens_pop',e='2020_muni')
+```
+
+:::
+
+## Chômage
+
+::: {.columns}
+
+### 2014
+
+```{python}
+plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_chom',e='2014_muni')
+```
+
+### 2020
+
+```{python}
+plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_chom',e='2020_muni')
+```
+
+:::
+
+## Emploi
+
+::: {.columns}
+
+### 2014
+
+```{python}
+plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_emploi',e='2014_muni')
+```
+
+### 2020
+
+```{python}
+plot_rdd(gdf_RDD_seuil, outcome_var='BC_taux_emploi',e='2020_muni')
+```
+
+:::
 :::
