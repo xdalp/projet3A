@@ -34,15 +34,20 @@ compute_rdd <- function(df,
                         election_choisie,
                         running_var = "delta_score_1",
                         cutoff = 0,
-                        cov_choisis = NULL) {
+                        cov_choisies = NULL) {
   # Filtrage sur l'élection choisie
   df_rdd <- df %>% filter(election == election_choisie)
+
+  covs_mat <- NULL
+  if (!is.null(cov_choisies) && cov_choisies != "aucun") {
+    covs_mat <- df_rdd[, cov_choisies, drop = FALSE]
+  }
 
   # Appel à rdrobust
   res <- rdrobust(y = df_rdd[[outcome_var]],
                   x = df_rdd[[running_var]],
                   c = cutoff,
-                  covs = cov_choisis,
+                  covs = covs_mat,
                   kernel = kernel_choisi)
 
   return(res)

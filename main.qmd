@@ -52,12 +52,8 @@ source("functions/main_functions.R")
 
 #chargement des var d'env pour Caro
 if (file.exists(".env")) {
-  print(Sys.getenv("AWS_ACCESS_KEY_ID"))
   dotenv::load_dot_env(".env")
-  print('dotenv ok')
-  print(Sys.getenv("AWS_ACCESS_KEY_ID"))
 } 
-getwd()
 
 # Télécharger le CSV
 remote_path <- "RDD/df_RDD_main_BC_full.csv"
@@ -107,8 +103,11 @@ for (i in seq_along(bc_vars)) {
 #| panel: sidebar
 kernels <- c("uni", "tri")
 variables <- c("surface_creee")
+effets_fixes_interco <- c("Nuance_interco", "aucun")
 radioButtons("k", "Choix du kernel", choices = kernels, selected = kernels[[1]], inline = TRUE)
 radioButtons("var", "Choix de la variable", choices = variables, selected = variables[[1]], inline = TRUE)
+radioButtons("var_ef", "Effet fixe pour la couleur de l'interco", choices = effets_fixes_interco,
+selected = effets_fixes_interco[[1]],inline = TRUE)
 ```
 
 ::: {.panel-tabset}
@@ -138,6 +137,7 @@ rdd_res <- reactive({
     gdf_RDD_seuil,
     outcome_var = input$var,
     kernel_choisi = input$k,
+    cov_choisies = input$var_ef,
     election_choisie = "2014_muni"
   )
 })
@@ -152,8 +152,7 @@ output$rdd_result <- renderPrint({
 p<- reactive({
   plot_rdd(gdf_RDD_seuil, 
   outcome_var = input$var)
-}
-)
+})
 
 output$plot_rdd <- renderPlot({p()})
 
