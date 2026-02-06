@@ -15,7 +15,7 @@ execute:
 #| echo: false
 #| output: false
 
-packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv","plotly","shiny")
+packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv","plotly","shiny", "dotenv")
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -30,7 +30,7 @@ lapply(packages, install_if_missing)
 ```{r}
 #| echo: false
 #| output: false
-
+library(dotenv)
 library(ggplot2)
 library(dplyr)
 library(reticulate)
@@ -38,6 +38,9 @@ library(dotenv)
 library(plotly)
 library(shiny)
 ```
+
+
+
 
 ```{r}
 #| echo: false
@@ -48,9 +51,13 @@ library(shiny)
 source("functions/main_functions.R")
 
 #chargement des var d'env pour Caro
-if (file.exists("projet3A/.env")) {
-  dotenv::load_dot_env("projet3A/.env")
+if (file.exists(".env")) {
+  print(Sys.getenv("AWS_ACCESS_KEY_ID"))
+  dotenv::load_dot_env(".env")
+  print('dotenv ok')
+  print(Sys.getenv("AWS_ACCESS_KEY_ID"))
 } 
+getwd()
 
 # Télécharger le CSV
 remote_path <- "RDD/df_RDD_main_BC_full.csv"
@@ -67,7 +74,7 @@ gdf_RDD<-get_s3_csv("mgarbe",remote_path)
 
 #récupérer l'objet Python
 seuil <- 8
-gdf_RDD_seuil <- gdf_RDD %>%filter(abs(delta_score_1) < seuil)
+gdf_RDD_seuil <- gdf_RDD %>% filter(abs(delta_score_1) < seuil)
 ```
 
 ::: {.panel-tabset}
