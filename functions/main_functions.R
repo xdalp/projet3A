@@ -25,34 +25,53 @@ get_s3_csv <- function(bucket,file_key) {
   return(df)
 }
 
-
-
-
 compute_rdd <- function(df,
                         outcome_var,
                         kernel_choisi = "uni",
-                        election_choisie,
+                        elections = c("2014_muni", "2020_muni"),
                         running_var = "delta_score_1",
                         cutoff = 0,
                         cov_choisies = NULL) {
-  # Filtrage sur l'élection choisie
-  df_rdd <- df %>% filter(election == election_choisie)
-
-  covs_mat <- NULL
-  if (!is.null(cov_choisies) && cov_choisies != "aucun") {
-    covs_mat <- df_rdd[, cov_choisies, drop = FALSE]
-  }
-
-  # Appel à rdrobust
-  res <- rdrobust(y = df_rdd[[outcome_var]],
-                  x = df_rdd[[running_var]],
-                  c = cutoff,
-                  covs = covs_mat,
-                  kernel = kernel_choisi)
-
-  return(res)
-  }
-
+  
+  library(dplyr)
+  library(rdrobust)
+  
+  # Boucle sur toutes les élections
+  results <- lapply(elections, function(elec) {
+    
+    # Filtrage sur l'élection
+    df_rdd <- df %>% filter(election == elec)
+    
+    # Covariables
+    covs_mat <- NULL
+    if (!is.null(cov_choisies) && cov_choisies != "aucun") {
+      covs_mat <- df_rdd[, cov_choisies, drop = FALSE]
+    }
+    
+    # Estimation RDD
+    res <- rdrobust(
+      y = df_rdd[[outcome_var]],
+      x = df_rdd[[running_var]],
+      c = cutoff,
+      covs = covs_mat,
+      kernel = kernel_choisi
+    )
+    
+    # Table pour cette élection
+    data.frame(
+      outcome = outcome_var,
+      election = elec,
+      coefficient = res$Estimate[1, 1],
+      std_error = res$se[1, 1],
+      p_value = res$pv[1, 1],
+      row.names = NULL
+    )
+    
+  })
+  
+  # Empiler les résultats
+  do.call(rbind, results)
+}
 
 
 plot_rdd <- function(df, outcome_var, running_var = "delta_score_1", cutoff = 0) {
@@ -78,4 +97,116 @@ plot_rdd <- function(df, outcome_var, running_var = "delta_score_1", cutoff = 0)
     facet_wrap(~election, labeller = as_labeller(c("2014_muni"="2014","2020_muni"="2020"))) +
     theme_minimal()
   return(p)
+}
+
+plot_rdd_kernel <- function(df,
+                     outcome_var,
+                     kernel = c("tri", "uni")) {
+  
+  kernel <- match.arg(kernel)
+  
+  library(dplyr)
+  library(ggplot2)
+  
+  df <- df %>%
+    mutate(x = delta_score_1)
+  
+  max_abs_x <- max(abs(df$x), na.rm = TRUE)
+  
+  kernel_weights <- function(x) {
+    if (kernel == "tri") {
+      1 - abs(x) / max_abs_x
+    } else {
+      rep(1, length(x))
+    }
+  }
+  
+  df <- df %>%
+    mutate(w = kernel_weights(x))
+  
+  fit_left <- lm(
+    as.formula(paste(outcome_var, "~ x")),
+    data = df %>% filter(x < 0),
+    weights = w
+  )
+  
+  fit_right <- lm(
+    as.formula(paste(outcome_var, "~ x")),
+    data = df %>% filter(x >= 0),
+    weights = w
+  )
+  
+  grid_left <- data.frame(
+    x = seq(min(df$x), 0, length.out = 200)
+  )
+  
+  grid_right <- data.frame(
+    x = seq(0, max(df$x), length.out = 200)
+  )
+  
+  grid_left <- cbind(
+    grid_left,
+    predict(fit_left, grid_left, interval = "confidence")
+  )
+  
+  grid_right <- cbind(
+    grid_right,
+    predict(fit_right, grid_right, interval = "confidence")
+  )
+  
+  ggplot(df, aes(x = x, y = .data[[outcome_var]])) +
+    geom_point(alpha = 0.4) +
+    
+    # IC gauche (gris)
+    geom_ribbon(
+      data = grid_left,
+      aes(x = x, ymin = lwr, ymax = upr),
+      inherit.aes = FALSE,
+      fill = "grey70",
+      alpha = 0.4
+    ) +
+    
+    # IC droit (gris)
+    geom_ribbon(
+      data = grid_right,
+      aes(x = x, ymin = lwr, ymax = upr),
+      inherit.aes = FALSE,
+      fill = "grey70",
+      alpha = 0.4
+    ) +
+    
+    # Régression gauche (rouge)
+    geom_line(
+      data = grid_left,
+      aes(x = x, y = fit),
+      inherit.aes = FALSE,
+      color = "red",
+      linewidth = 1
+    ) +
+    
+    # Régression droite (bleu)
+    geom_line(
+      data = grid_right,
+      aes(x = x, y = fit),
+      inherit.aes = FALSE,
+      color = "blue",
+      linewidth = 1
+    ) +
+    
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    
+    labs(
+      x = "Écart de score",
+      y = "",
+      title = paste("RDD – kernel", kernel)
+    ) +
+    
+    facet_wrap(
+      ~ election,
+      labeller = as_labeller(
+        c("2014_muni" = "2014", "2020_muni" = "2020")
+      )
+    ) +
+    
+    theme_minimal()
 }

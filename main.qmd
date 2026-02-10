@@ -1,7 +1,6 @@
 ---
-title: "main"
+title: "L'étiquette politique des élus locaux influence-t-elle l'artificialisation des sols à des fins industrielles et logistiques ?"
 author: "Caroline Lebrun-Sabalot, Pierre Ripoll, Matéo Garbe"
-server: shiny
 format:
   html:
     toc: true
@@ -100,71 +99,77 @@ for (i in seq_along(bc_vars)) {
 
 # Régressions
 
-```{r}
-#| panel: sidebar
-kernels <- c("uni", "tri")
-variables <- c("surface_creee")
-effets_fixes_interco <- c("Nuance_interco", "aucun")
-radioButtons("k", "Choix du kernel", choices = kernels, selected = kernels[[1]], inline = TRUE)
-radioButtons("var", "Choix de la variable", choices = variables, selected = variables[[1]], inline = TRUE)
-radioButtons("var_ef", "Effet fixe pour la couleur de l'interco", choices = effets_fixes_interco,
-selected = effets_fixes_interco[[1]],inline = TRUE)
+```{r, echo=FALSE}
+# Fonction pour générer graphique + table
+rdd_report <- function(data, outcome_var, kernel, effet_fixe = NULL,elections= c("2014_muni", "2020_muni")) {
+  # Graphique
+  p <- plot_rdd_kernel(data, outcome_var = outcome_var,kernel)
+  
+    # Table RDD
+  if (!is.null(effet_fixe)) {
+    tab <- compute_rdd(
+      df = data,
+      outcome_var = outcome_var,
+      kernel_choisi = kernel,
+      cov_choisies = effet_fixe,
+      elections = elections
+    )
+  } else {
+    tab <- compute_rdd(
+      df = data,
+      outcome_var = outcome_var,
+      kernel_choisi = kernel,
+      cov_choisies = NULL,
+      elections = elections
+    )
+  }
+  
+  # Retourne un tibble/table + graphique dans une liste
+  list(
+    plot = p,
+    table = tab
+  )
+}
+
 ```
 
 ::: {.panel-tabset}
 
-## Plot
+## Fig. kernel uni
 ```{r}
-#| panel: fill
-plotOutput("plot_rdd")
+res_uni <- rdd_report(gdf_RDD_seuil, "surface_creee", kernel = "uni") #add Nuance_interco
+print(res_uni$plot)
 ```
 
 
-## Table
+## Tab. kernel uni
 
 ```{r}
-#| panel: fill
-verbatimTextOutput("rdd_result")
+print(res_uni$tab)
 ```
+
+
+## Fig. kernel tri
+
+```{r}
+res_tri <- rdd_report(gdf_RDD_seuil, "surface_creee", kernel = "tri")
+print(res_tri$plot)
+```
+
+
+## Tab. kernel tri
+
+```{r}
+print(res_tri$tab)
+```
+
 
 :::
 
-```{r}
-#| context: server
+<!-- ::: {.panel-tabset}-->
 
-#table
-rdd_res <- reactive({
-  compute_rdd(
-    gdf_RDD_seuil,
-    outcome_var = input$var,
-    kernel_choisi = input$k,
-    cov_choisies = input$var_ef,
-    election_choisie = "2014_muni"
-  )
-})
-
-output$rdd_result <- renderPrint({
-  res <- rdd_res()
-  cat("Estimate :", res$Estimate, "\n")
-  cat("p-value :", res$pv, "\n")
-})
-
-#plot
-p<- reactive({
-  plot_rdd(gdf_RDD_seuil, 
-  outcome_var = input$var)
-})
-
-output$plot_rdd <- renderPlot({p()})
-
-```
-
-
-
-::: {.panel-tabset}
-
-## Avec kernel uniforme
-```{r}
+<!--  ## Avec kernel uniforme -->
+```{r,eval=FALSE}
 #| echo: false
 rdd_unif = compute_rdd(gdf_RDD_seuil,
                         outcome_var = "surface_creee", 
@@ -175,8 +180,8 @@ rdd_unif$pv
 ```
 
 
-## Avec kernel triangulaire
-```{r}
+<!--  ## Avec kernel triangulaire -->
+```{r,eval=FALSE}
 #| echo: false
 rdd_tri = compute_rdd(gdf_RDD_seuil,
                         outcome_var = "surface_creee", 
@@ -188,8 +193,8 @@ rdd_tri$pv
 ```
 
 
-## Avec kernel uniforme
-```{r}
+<!-- ## Avec kernel uniforme -->
+```{r,eval=FALSE}
 #| echo: false
 rdd_unif = compute_rdd(gdf_RDD_seuil,
                         outcome_var = "surface_creee", 
@@ -199,4 +204,4 @@ rdd_unif$Estimate
 rdd_unif$pv
 ```
 
-:::
+<!--:::-->
