@@ -6,6 +6,7 @@ format:
   html:
     toc: true
     theme: cosmo
+    self-contained: true
 execute: 
     echo: false
 ---
