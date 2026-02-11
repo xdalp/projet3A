@@ -46,7 +46,7 @@ library(shiny)
 #| echo: false
 #| output: false
 #| context: setup
-
+setwd("/home/onyxia/work/projet3A")
 # Charger les fonctions
 source("functions/main_functions.R")
 
@@ -55,11 +55,27 @@ if (file.exists(".env")) {
   dotenv::load_dot_env(".env")
 } 
 
-# Télécharger le CSV
+# Télécharger le CSV du RDD
 remote_path <- "RDD/df_RDD_main_BC_full.csv"
 gdf_RDD<-get_s3_csv("mgarbe",remote_path)
 
+# Télécharger le CSV pour les stats desc du vote
+remote_path_elec="Elections/donnees_duel_maires_wide.csv"
+gdf_vote<-get_s3_csv("mgarbe",remote_path_elec, delim_csv = ",")
+
 ```
+
+## Répartition des votes en 2014
+```{r}
+#Quelques statistiques sur les variables du vote : les scores, les couleurs politiques des maires, etc
+hist(gdf_vote$rang1_voix_pct[gdf_vote$annee == 2014], xlab = "Pourcentage de voix obtenu par le gagnant", ylab = "")
+```
+
+## Répartition des votes en 2020
+```{r}
+hist(gdf_vote$rang1_voix_pct[gdf_vote$annee == 2020], xlab = "Pourcentage de voix obtenu par le gagnant", ylab = "")
+```
+
 
 # Balanced Checks 
 

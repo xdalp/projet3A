@@ -4,7 +4,7 @@ library(rdrobust)
 library(aws.s3)
 library(readr)
 
-get_s3_csv <- function(bucket,file_key) {
+get_s3_csv <- function(bucket,file_key,delim_csv = ";") {
   Sys.setenv(
     "AWS_ACCESS_KEY_ID"     = Sys.getenv("AWS_ACCESS_KEY_ID"),
     "AWS_SECRET_ACCESS_KEY" = Sys.getenv("AWS_SECRET_ACCESS_KEY"),
@@ -17,7 +17,7 @@ get_s3_csv <- function(bucket,file_key) {
   df <- s3read_using(
     #FUN = readr::read_csv, # Fonction pour lire un CSV avec séparateur virgule
     FUN = readr::read_delim, # Fonction pour choisir le séparateur du csv
-    delim = ";", # Spécifie le séparateur correct
+    delim = delim_csv, # Spécifie le séparateur correct
     object = file_key,
     bucket = bucket,
     opts = list("region" = "")
