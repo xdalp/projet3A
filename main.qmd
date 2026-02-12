@@ -65,16 +65,34 @@ gdf_vote<-get_s3_csv("mgarbe",remote_path_elec, delim_csv = ",")
 
 ```
 
-## Répartition des votes en 2014
-```{r}
-#Quelques statistiques sur les variables du vote : les scores, les couleurs politiques des maires, etc
-hist(gdf_vote$rang1_voix_pct[gdf_vote$annee == 2014], xlab = "Pourcentage de voix obtenu par le gagnant", ylab = "")
-```
 
-## Répartition des votes en 2020
+## Répartition des votes
+
+::: {.panel-tabset}
+
 ```{r}
-hist(gdf_vote$rang1_voix_pct[gdf_vote$annee == 2020], xlab = "Pourcentage de voix obtenu par le gagnant", ylab = "")
-```
+#| echo: false
+#| results: asis
+#| warning: false
+
+
+# Quelques statistiques sur les variables du vote pour 2014
+cat(paste0("## 2014 \n\n"))
+hist(gdf_vote$rang1_voix_pct[gdf_vote$annee == 2014], 
+xlab = "Pourcentage de voix obtenu par le gagnant", 
+ylab = "")
+cat("\n\n")
+
+cat(paste0("## 2020 \n\n"))
+# Quelques statistiques sur les variables du vote pour 2020
+hist(gdf_vote$rang1_voix_pct[gdf_vote$annee == 2020], 
+xlab = "Pourcentage de voix obtenu par le gagnant", 
+ylab = "")
+cat("\n\n")
+
+``` 
+
+:::
 
 
 # Balanced Checks 
