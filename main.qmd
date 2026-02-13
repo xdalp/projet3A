@@ -15,7 +15,7 @@ execute:
 #| echo: false
 #| output: false
 
-packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv","plotly","shiny", "dotenv")
+packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv","plotly","shiny", "dotenv","RColorBrewer")
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -37,6 +37,7 @@ library(reticulate)
 library(dotenv)
 library(plotly)
 library(shiny)
+library(RColorBrewer)
 ```
 
 
@@ -68,31 +69,33 @@ gdf_vote<-get_s3_csv("mgarbe",remote_path_elec, delim_csv = ",")
 
 ## Répartition des votes
 
-::: {.panel-tabset}
 
-```{r}
-#| echo: false
-#| results: asis
-#| warning: false
+```{r,echo=FALSE,warning=FALSE}
+graph <- gdf_vote %>% 
+  filter(annee %in% c(2014, 2020)) %>% 
+  ggplot(aes(
+    x = rang1_voix_pct,
+    color = factor(annee),
+    fill  = factor(annee)
+  )) +
+  geom_density(alpha=0.3,linewidth = 0.5, show.legend = FALSE) +
+   scale_color_manual(
+      values = c(
+        "2014" = brewer.pal(11, "RdBu")[1],   # bleu extrême
+        "2020" = brewer.pal(11, "RdBu")[11]   # rouge extrême
+      )
+    ) +
+  labs(
+    x = "Pourcentage de voix obtenu par le gagnant",
+    y = "Densité",
+    color = "Année"
+  ) +
+  theme_minimal()
+  
 
+ggplotly(graph) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2))
+```
 
-# Quelques statistiques sur les variables du vote pour 2014
-cat(paste0("## 2014 \n\n"))
-hist(gdf_vote$rang1_voix_pct[gdf_vote$annee == 2014], 
-xlab = "Pourcentage de voix obtenu par le gagnant", 
-ylab = "")
-cat("\n\n")
-
-cat(paste0("## 2020 \n\n"))
-# Quelques statistiques sur les variables du vote pour 2020
-hist(gdf_vote$rang1_voix_pct[gdf_vote$annee == 2020], 
-xlab = "Pourcentage de voix obtenu par le gagnant", 
-ylab = "")
-cat("\n\n")
-
-``` 
-
-:::
 
 
 # Balanced Checks 
