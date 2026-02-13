@@ -48,7 +48,7 @@ df_vote = df_vote[
 df_vote['delta_score_1'] = df_vote['rang1_Nuance'] * (df_vote['rang1_voix_pct'] - df_vote['rang2_voix_pct'])
 df_vote["duel"] = ((df_vote["rang1_voix_pct"] + df_vote["rang2_voix_pct"]) == 100).astype(int)
 
-df_vote=df_vote[["election","Code INSEE","rang1_Nuance","delta_score_1","Nuance_interco"]].copy()
+df_vote=df_vote[["election","Code INSEE","rang1_Nuance","rang1_voix_pct","delta_score_1","Nuance_interco"]].copy()
 
 
 #[gdf] traitement gdf selon le mandat

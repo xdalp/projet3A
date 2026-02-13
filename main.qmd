@@ -15,7 +15,10 @@ execute:
 #| echo: false
 #| output: false
 
-packages <- c("dplyr", "ggplot2", "reticulate", "rdrobust","dotenv","plotly","shiny", "dotenv","RColorBrewer")
+packages <- c("dplyr", "ggplot2", "reticulate",
+              "rdrobust","dotenv","plotly","shiny", 
+              "dotenv","RColorBrewer","tidyverse",
+              "sf") #carto
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -38,6 +41,7 @@ library(dotenv)
 library(plotly)
 library(shiny)
 library(RColorBrewer)
+library(tidyverse)
 ```
 
 
@@ -58,25 +62,39 @@ if (file.exists(".env")) {
 
 # Télécharger le CSV du RDD
 remote_path <- "RDD/df_RDD_main_BC_full.csv"
-gdf_RDD<-get_s3_csv("mgarbe",remote_path)
+gdf_RDD<-get_s3_csv("mgarbe",remote_path) %>% 
+    mutate(election = factor(gsub("_muni", "", election)))
 
 # Télécharger le CSV pour les stats desc du vote
 remote_path_elec="Elections/donnees_duel_maires_wide.csv"
-gdf_vote<-get_s3_csv("mgarbe",remote_path_elec, delim_csv = ",")
+df_vote <- get_s3_csv("mgarbe", remote_path_elec, delim_csv = ",") %>% 
+  mutate(election = factor(gsub("_muni", "", election)))
+```
 
+```{r}
+#| echo: false
+#| output: false
+#| context: data
+
+#récupérer l'objet Python
+seuil <- 8
+gdf_RDD_seuil <- gdf_RDD %>% filter(abs(delta_score_1) < seuil)
 ```
 
 
+# Statistiques descriptives
+
 ## Répartition des votes
 
+::: {.panel-tabset}
 
-```{r,echo=FALSE,warning=FALSE}
-graph <- gdf_vote %>% 
-  filter(annee %in% c(2014, 2020)) %>% 
+```{r}
+distrib_vote <- function(df){
+graph <- df %>%  
   ggplot(aes(
     x = rang1_voix_pct,
-    color = factor(annee),
-    fill  = factor(annee)
+    color = election,
+    fill  = election
   )) +
   geom_density(alpha=0.3,linewidth = 0.5, show.legend = FALSE) +
    scale_color_manual(
@@ -91,24 +109,32 @@ graph <- gdf_vote %>%
     color = "Année"
   ) +
   theme_minimal()
-  
+return(graph)
+} 
+```
 
-ggplotly(graph) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2))
+## Toutes les communes
+
+```{r,echo=FALSE,warning=FALSE}
+ggplotly(distrib_vote(df_vote)) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
+```
+
+## Duels DVG/DVD seulement
+```{r,echo=FALSE,warning=FALSE}
+ggplotly(distrib_vote(gdf_RDD)) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
 ```
 
 
+## Duels au seuil seulement
+
+```{r,echo=FALSE,warning=FALSE}
+ggplotly(distrib_vote(gdf_RDD_seuil)) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
+```
+
+
+:::
 
 # Balanced Checks 
-
-```{r}
-#| echo: false
-#| output: false
-#| context: data
-
-#récupérer l'objet Python
-seuil <- 8
-gdf_RDD_seuil <- gdf_RDD %>% filter(abs(delta_score_1) < seuil)
-```
 
 ::: {.panel-tabset}
 
@@ -129,6 +155,33 @@ for (i in seq_along(bc_vars)) {
   print(p)
   cat("\n\n")
 }
+```
+
+## Géographie
+
+```{r,echo=FALSE,warning=FALSE}
+#code INSEE au seuil
+codes <- gdf_RDD_seuil %>% select('Code INSEE') %>% pull()
+
+#utilisation API géographique
+communes_list <- lapply(codes, get_commune_contour)
+communes_geo <- do.call(rbind, communes_list)
+communes_map <- communes_geo %>% select(code,geometry) %>% 
+  left_join(gdf_RDD_seuil, by = c("code" = "Code INSEE"))
+
+# Carte
+carte <- ggplot(communes_map) +
+  geom_sf(aes(color = factor(rang1_Nuance))) +  # pour polygones
+  scale_color_manual(
+    values = c("-1" = brewer.pal(11, "RdBu")[2], 
+               "1"  = brewer.pal(11, "RdBu")[9]),
+    labels = c("-1" = "DVG", "1" = "DVD"),  # label pour la légende
+    name = "Couleur politique du gagnant"   # titre de la légende
+  ) +
+  facet_wrap(~election) +
+  theme_minimal()
+
+ggplotly(carte) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
 
 ```
 
@@ -138,7 +191,7 @@ for (i in seq_along(bc_vars)) {
 
 ```{r, echo=FALSE}
 # Fonction pour générer graphique + table
-rdd_report <- function(data, outcome_var, kernel, effet_fixe = NULL,elections= c("2014_muni", "2020_muni")) {
+rdd_report <- function(data, outcome_var, kernel, effet_fixe = NULL,elections= c(2014, 2020)) {
   # Graphique
   p <- plot_rdd_kernel(data, outcome_var = outcome_var,kernel)
   
@@ -170,75 +223,99 @@ rdd_report <- function(data, outcome_var, kernel, effet_fixe = NULL,elections= c
 
 ```
 
+
+## Figures
+
+```{r,echo=FALSE,cache=TRUE}
+#nb permis 
+rdd_nb_permis_uni <- rdd_report(gdf_RDD_seuil,"nb_permis", kernel = "uni") 
+rdd_nb_permis_tri <- rdd_report(gdf_RDD_seuil,"nb_permis", kernel = "tri") 
+
+#surface
+rdd_surf_uni <- rdd_report(gdf_RDD_seuil,"surface_creee", kernel = "uni") 
+rdd_surf_tri <- rdd_report(gdf_RDD_seuil,"surface_creee", kernel = "tri") 
+
+#surface moyenne 
+rdd_surf_moy_uni <- rdd_report(gdf_RDD_seuil,"surface_moyenne", kernel = "uni") 
+rdd_surf_moy_tri <- rdd_report(gdf_RDD_seuil,"surface_moyenne", kernel = "tri") 
+```
+
 ::: {.panel-tabset}
 
-## Fig. kernel uni
+### [Permis] kernel uni
 ```{r}
-res_uni <- rdd_report(gdf_RDD_seuil, "surface_creee", kernel = "uni") #add Nuance_interco
-print(res_uni$plot)
+print(rdd_nb_permis_uni$plot)
 ```
 
-
-## Tab. kernel uni
-
-```{r}
-print(res_uni$tab)
-```
-
-
-## Fig. kernel tri
+### [Permis] kernel tri
 
 ```{r}
-res_tri <- rdd_report(gdf_RDD_seuil, "surface_creee", kernel = "tri")
-print(res_tri$plot)
+print(rdd_nb_permis_tri$plot)
 ```
 
+### [Surface crée] kernel uni
+```{r}
+print(rdd_surf_uni$plot)
+```
 
-## Tab. kernel tri
+### [Surface crée] kernel tri
 
 ```{r}
-print(res_tri$tab)
+print(rdd_surf_tri$plot)
 ```
 
+### [Surface moyenne] kernel uni
+```{r}
+print(rdd_surf_moy_uni$plot)
+```
+
+### [Surface moyenne] kernel tri
+
+```{r}
+print(rdd_surf_moy_tri$plot)
+```
 
 :::
 
-<!-- ::: {.panel-tabset}-->
 
-<!--  ## Avec kernel uniforme -->
-```{r,eval=FALSE}
-#| echo: false
-rdd_unif = compute_rdd(gdf_RDD_seuil,
-                        outcome_var = "surface_creee", 
-                        kernel_choisi = "uni",
-                        election = "2020_muni")
-rdd_unif$Estimate
-rdd_unif$pv
+## Tables
+
+::: {.panel-tabset}
+
+### [Permis] kernel uni
+
+```{r}
+print(rdd_nb_permis_uni$tab)
 ```
 
+### [Permis] kernel tri
 
-<!--  ## Avec kernel triangulaire -->
-```{r,eval=FALSE}
-#| echo: false
-rdd_tri = compute_rdd(gdf_RDD_seuil,
-                        outcome_var = "surface_creee", 
-                        kernel_choisi = "tri",
-                        election_choisie = "2014_muni")
-print(rdd_tri)
-rdd_tri$Estimate
-rdd_tri$pv
+```{r}
+print(rdd_nb_permis_tri$tab)
 ```
 
+### [Surface crée] kernel uni
 
-<!-- ## Avec kernel uniforme -->
-```{r,eval=FALSE}
-#| echo: false
-rdd_unif = compute_rdd(gdf_RDD_seuil,
-                        outcome_var = "surface_creee", 
-                        kernel_choisi = "uni",
-                        election_choisie = "2014_muni")
-rdd_unif$Estimate
-rdd_unif$pv
+```{r}
+print(rdd_surf_uni$tab)
 ```
 
-<!--:::-->
+### [Surface crée] kernel tri
+
+```{r}
+print(rdd_surf_tri$tab)
+```
+
+### [Surface moyenne] kernel uni
+
+```{r}
+print(rdd_surf_moy_uni$tab)
+```
+
+### [Surface moyenne] kernel tri
+
+```{r}
+print(rdd_surf_moy_tri$tab)
+```
+
+:::

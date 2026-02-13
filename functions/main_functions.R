@@ -3,6 +3,10 @@ library(ggplot2)
 library(rdrobust)
 library(aws.s3)
 library(readr)
+library(dplyr)
+library(rdrobust)
+library(sf)
+library(RColorBrewer)
 
 get_s3_csv <- function(bucket,file_key,delim_csv = ";") {
   Sys.setenv(
@@ -32,9 +36,6 @@ compute_rdd <- function(df,
                         running_var = "delta_score_1",
                         cutoff = 0,
                         cov_choisies = NULL) {
-  
-  library(dplyr)
-  library(rdrobust)
   
   # Boucle sur toutes les élections
   results <- lapply(elections, function(elec) {
@@ -81,13 +82,13 @@ plot_rdd <- function(df, outcome_var, running_var = "delta_score_1", cutoff = 0)
       data = df %>% filter(.data[[running_var]] < cutoff),
       method = "lm",
       se = TRUE,
-      color = "red"
+      color = brewer.pal(11, "RdBu")[2]
     ) +
     geom_smooth(
       data = df %>% filter(.data[[running_var]] >= cutoff),
       method = "lm",
       se = TRUE,
-      color = "blue"
+      color = brewer.pal(11, "RdBu")[9]
     ) +
     geom_vline(xintercept = cutoff, linetype = "dashed") +
     labs(
@@ -104,10 +105,6 @@ plot_rdd_kernel <- function(df,
                      kernel = c("tri", "uni")) {
   
   kernel <- match.arg(kernel)
-  
-  library(dplyr)
-  library(ggplot2)
-  
   df <- df %>%
     mutate(x = delta_score_1)
   
@@ -180,7 +177,7 @@ plot_rdd_kernel <- function(df,
       data = grid_left,
       aes(x = x, y = fit),
       inherit.aes = FALSE,
-      color = "red",
+      color = brewer.pal(11, "RdBu")[2],
       linewidth = 1
     ) +
     
@@ -189,7 +186,7 @@ plot_rdd_kernel <- function(df,
       data = grid_right,
       aes(x = x, y = fit),
       inherit.aes = FALSE,
-      color = "blue",
+      color = brewer.pal(11, "RdBu")[9],
       linewidth = 1
     ) +
     
@@ -209,4 +206,13 @@ plot_rdd_kernel <- function(df,
     ) +
     
     theme_minimal()
+}
+
+
+
+
+get_commune_contour <- function(code_insee) {
+  url <- paste0("https://geo.api.gouv.fr/communes/", code_insee,
+                "?format=geojson&geometry=centre")
+  st_read(url, quiet = TRUE)
 }
