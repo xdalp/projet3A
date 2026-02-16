@@ -63,12 +63,14 @@ if (file.exists(".env")) {
 # Télécharger le CSV du RDD
 remote_path <- "RDD/df_RDD_main_BC_full.csv"
 gdf_RDD<-get_s3_csv("mgarbe",remote_path) %>% 
-    mutate(election = factor(gsub("_muni", "", election)))
+          mutate(election = factor(gsub("_muni", "", election))) %>%
+          mutate(dummy_surface_creee = as.integer(surface_creee > 0)) %>%
+          mutate(dummy_permis = as.integer(nb_permis > 0))
 
 # Télécharger le CSV pour les stats desc du vote
 remote_path_elec="Elections/donnees_duel_maires_wide.csv"
 df_vote <- get_s3_csv("mgarbe", remote_path_elec, delim_csv = ",") %>% 
-  mutate(election = factor(gsub("_muni", "", election)))
+          mutate(election = factor(gsub("_muni", "", election))) 
 ```
 
 ```{r}
