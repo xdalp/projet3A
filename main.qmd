@@ -49,7 +49,7 @@ library(rlang)
 
 
 
-```{r}
+```{r import_donnees}
 #| echo: false
 #| output: false
 #| context: setup
@@ -221,7 +221,7 @@ for (i in seq_along(bc_vars)) {
 
 ## Géographie
 
-```{r,echo=FALSE,warning=FALSE}
+```{r geographie,echo=FALSE,warning=FALSE}
 #code INSEE au seuil
 codes <- gdf_RDD_seuil %>% select('Code INSEE') %>% pull()
 
@@ -288,7 +288,7 @@ rdd_report <- function(data, outcome_var, kernel, effet_fixe = NULL,elections= c
 
 ## Figures
 
-```{r,echo=FALSE,cache=TRUE}
+```{r fig_rdd,echo=FALSE,cache=TRUE}
 #nb permis 
 rdd_nb_permis_uni <- rdd_report(gdf_RDD_seuil,"nb_permis", kernel = "uni") 
 rdd_nb_permis_tri <- rdd_report(gdf_RDD_seuil,"nb_permis", kernel = "tri") 
@@ -346,7 +346,7 @@ print(rdd_surf_moy_tri$plot)
 
 ### [Permis] kernel uni
 
-```{r}
+```{r premiere_table}
 print(rdd_nb_permis_uni$tab)
 ```
 
