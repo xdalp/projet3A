@@ -42,6 +42,8 @@ library(plotly)
 library(shiny)
 library(RColorBrewer)
 library(tidyverse)
+library(rlang)
+
 ```
 
 
@@ -85,6 +87,64 @@ gdf_RDD_seuil <- gdf_RDD %>% filter(abs(delta_score_1) < seuil)
 
 
 # Statistiques descriptives
+
+::: {.panel-tabset}
+
+```{r,echo=FALSE,warning=FALSE}
+hist_variable <- function(data, variable,  titre_variable = NULL,bins = 30) {
+  
+  var_quo <- enquo(variable)
+  var_name <- as_label(var_quo)
+  
+  med <- median(dplyr::pull(data, !!var_quo), na.rm = TRUE)
+  
+  p <- ggplot(data, aes(x = !!var_quo)) +
+    
+    geom_histogram(
+      bins = bins,
+      fill = "#2C7FB8",
+      color = "white",
+      alpha = 0.85
+    ) +
+    
+    geom_vline(
+      xintercept = med,
+      linetype = "dashed",
+      size = 1,
+      color = "#D95F0E"
+    ) +
+    
+    labs(
+      title = paste("Distribution ", titre_variable),
+      subtitle = paste("Médiane :", round(med, 1)),
+      x = var_name,
+      y = "Nombre d'observations"
+    ) +
+    
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(face = "bold", hjust = 0.5)
+    )
+  
+  ggplotly(p) %>%
+    layout(bargap = 0.05)
+}
+```
+
+
+## Distribution de la surface créée
+```{r,echo=FALSE,warning=FALSE}
+hist_variable(gdf_RDD, surface_creee, titre_variable = "de la surface créée")
+```
+
+## Distribution du nombre de permis
+```{r,echo=FALSE,warning=FALSE}
+hist_variable(gdf_RDD, nb_permis, titre_variable = "du nombre de permis")
+```
+
+
+:::
+
 
 ## Répartition des votes
 
