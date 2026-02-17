@@ -1,6 +1,6 @@
 ---
 title: "L'étiquette politique des élus locaux influence-t-elle l'artificialisation des sols à des fins industrielles et logistiques ?"
-author: "Caroline Lebrun-Sabalot, Pierre Ripoll, Matéo Garbe"
+author: "Matéo Garbe, Caroline Lebrun-Sabalot, Pierre Ripoll"
 format:
   html:
     toc: true
@@ -67,7 +67,8 @@ remote_path <- "RDD/df_RDD_main_BC_full.csv"
 gdf_RDD<-get_s3_csv("mgarbe",remote_path) %>% 
           mutate(election = factor(gsub("_muni", "", election))) %>%
           mutate(dummy_surface_creee = as.integer(surface_creee > 0)) %>%
-          mutate(dummy_permis = as.integer(nb_permis > 0))
+          mutate(dummy_permis = as.integer(nb_permis > 0)) %>%
+          filter(`Code INSEE` != 31555) #on enlève Toulouse de 2020, qui a 50 permis , gros outlier
 
 # Télécharger le CSV pour les stats desc du vote
 remote_path_elec="Elections/donnees_duel_maires_wide.csv"
@@ -86,12 +87,12 @@ gdf_RDD_seuil <- gdf_RDD %>% filter(abs(delta_score_1) < seuil)
 ```
 
 
-# Statistiques descriptives
+# Statistiques descriptives sur l'ensemble des communes
 
 ::: {.panel-tabset}
 
 ```{r,echo=FALSE,warning=FALSE}
-hist_variable <- function(data, variable,  titre_variable = NULL,bins = 30) {
+hist_variable <- function(data, variable,  titre_variable = NULL,bins = 50) {
   
   var_quo <- enquo(variable)
   var_name <- as_label(var_quo)
@@ -140,6 +141,12 @@ hist_variable(gdf_RDD, surface_creee, titre_variable = "de la surface créée")
 ## Distribution du nombre de permis
 ```{r,echo=FALSE,warning=FALSE}
 hist_variable(gdf_RDD, nb_permis, titre_variable = "du nombre de permis")
+```
+
+
+## Distribution du "delta" du score (avance du candidat de droite par rapport au candidat de gauche)
+```{r,echo=FALSE,warning=FALSE}
+hist_variable(gdf_RDD, delta_score_1, titre_variable = "du delta de score")
 ```
 
 
