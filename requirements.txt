@@ -13,3 +13,4 @@ openpyxl
 rdrobust
 IPython
 seaborn
+dotenv
