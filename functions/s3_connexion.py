@@ -1,7 +1,10 @@
 import boto3
 import os 
+from dotenv import load_dotenv
+
 
 def get_s3():
+    load_dotenv(override=True)
     return boto3.client(
         "s3",
         endpoint_url="https://minio.lab.sspcloud.fr",
