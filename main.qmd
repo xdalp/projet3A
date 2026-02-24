@@ -135,12 +135,16 @@ hist_variable <- function(data, variable,  titre_variable = NULL,bins = 50) {
 
 ## Nouvelle surface moyenne créée durant le mandat par commune, par couleur politique
 ```{r}
-print("tableau surface créée par couleur de commune, à faire")
+moyennes_par_couleur_muni = gdf_RDD %>%
+                      group_by(rang1_Nuance, election) %>%
+                      summarise(moyenne_nb_permis = mean(nb_permis, na.rm = TRUE),
+                                moyenne_surface = mean(surface_creee))
+print(moyennes_par_couleur_muni$moyenne_nb_permis)
 ```
 
 ## Nombre de permis durant le mandat par commune, par couleur politique
 ```{r}
-print("tableau surface créée par couleur de commune, à faire")
+print(moyennes_par_couleur_muni)
 ```
 
 
