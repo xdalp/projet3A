@@ -133,6 +133,18 @@ hist_variable <- function(data, variable,  titre_variable = NULL,bins = 50) {
 ```
 
 
+## Nouvelle surface moyenne créée durant le mandat par commune, par couleur politique
+```{r}
+print("tableau surface créée par couleur de commune, à faire")
+```
+
+## Nombre de permis durant le mandat par commune, par couleur politique
+```{r}
+print("tableau surface créée par couleur de commune, à faire")
+```
+
+
+
 ## Distribution de la surface créée
 ```{r,echo=FALSE,warning=FALSE}
 hist_variable(gdf_RDD, surface_creee, titre_variable = "de la surface créée")
