@@ -18,7 +18,7 @@ execute:
 packages <- c("dplyr", "ggplot2", "reticulate",
               "rdrobust","dotenv","plotly","shiny", 
               "dotenv","RColorBrewer","tidyverse",
-              "sf") #carto
+              "sf", "gt") #carto
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -36,6 +36,7 @@ lapply(packages, install_if_missing)
 library(dotenv)
 library(ggplot2)
 library(dplyr)
+library(gt)
 library(reticulate)
 library(dotenv)
 library(plotly)
@@ -138,13 +139,21 @@ hist_variable <- function(data, variable,  titre_variable = NULL,bins = 50) {
 moyennes_par_couleur_muni = gdf_RDD %>%
                       group_by(rang1_Nuance, election) %>%
                       summarise(moyenne_nb_permis = mean(nb_permis, na.rm = TRUE),
-                                moyenne_surface = mean(surface_creee))
+                                moyenne_surface = mean(surface_creee)) %>%
+                      ungroup()
 print(moyennes_par_couleur_muni$moyenne_nb_permis)
 ```
 
 ## Nombre de permis durant le mandat par commune, par couleur politique
 ```{r}
-print(moyennes_par_couleur_muni)
+moyennes_par_couleur_muni %>% 
+    arrange(election) %>% 
+    group_by(election) %>%
+    gt() %>% 
+    tab_header(
+      title = "Nombre moyen de permis et surface moyenne durant le mandat",
+      subtitle = "Par couleur politique"
+    )
 ```
 
 
