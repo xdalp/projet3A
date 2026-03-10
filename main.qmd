@@ -432,17 +432,7 @@ print(rdd_surf_tri$tab)
 ```
 
 
-### [Surface créée : binaire] kernel uni
 
-```{r}
-print(rdd_surf_uni_dummy$tab)
-```
-
-### [Surface créée : binaire] kernel tri
-
-```{r}
-print(rdd_surf_tri_dummy$tab)
-```
 
 ### [Surface moyenne] kernel uni
 
