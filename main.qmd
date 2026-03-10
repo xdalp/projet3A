@@ -67,7 +67,6 @@ if (file.exists(".env")) {
 remote_path <- "RDD/df_RDD_main_BC_full.csv"
 gdf_RDD<-get_s3_csv("mgarbe",remote_path) %>% 
           mutate(election = factor(gsub("_muni", "", election))) %>%
-          mutate(dummy_surface_creee = as.integer(surface_creee > 0)) %>%
           mutate(dummy_permis = as.integer(nb_permis > 0)) %>%
           filter(`Code INSEE` != 31555) #on enlève Toulouse de 2020, qui a 50 permis , gros outlier
 
@@ -329,13 +328,9 @@ rdd_nb_permis_tri <- rdd_report(gdf_RDD_seuil,"nb_permis", kernel = "tri")
 rdd_surf_uni <- rdd_report(gdf_RDD_seuil,"surface_creee", kernel = "uni") 
 rdd_surf_tri <- rdd_report(gdf_RDD_seuil,"surface_creee", kernel = "tri") 
 
-#nb permis 
+#nb permis dummy
 rdd_nb_permis_uni_dummy <- rdd_report(gdf_RDD_seuil,"dummy_permis", kernel = "uni") 
-rdd_nb_permis_tri_dummy <- rdd_report(gdf_RDD_seuil,"dummy_permis", kernel = "tri") 
-
-#surface
-rdd_surf_uni_dummy <- rdd_report(gdf_RDD_seuil,"dummy_surface_creee", kernel = "uni") 
-rdd_surf_tri_dummy <- rdd_report(gdf_RDD_seuil,"dummy_surface_creee", kernel = "tri") 
+rdd_nb_permis_tri_dummy <- rdd_report(gdf_RDD_seuil,"dummy_permis", kernel = "tri")  
 
 #surface moyenne 
 rdd_surf_moy_uni <- rdd_report(gdf_RDD_seuil,"surface_moyenne", kernel = "uni") 
@@ -379,16 +374,6 @@ print(rdd_surf_uni$plot)
 print(rdd_surf_tri$plot)
 ```
 
-### [Surface créée : binaire] kernel uni
-```{r}
-print(rdd_surf_uni_dummy$plot)
-```
-
-### [Surface créée : binaire] kernel tri
-
-```{r}
-print(rdd_surf_tri_dummy$plot)
-```
 
 
 ### [Surface moyenne] kernel uni
@@ -421,16 +406,42 @@ print(rdd_nb_permis_uni$tab)
 print(rdd_nb_permis_tri$tab)
 ```
 
-### [Surface crée] kernel uni
+### [Permis : binaire] kernel uni
+
+```{r}
+print(rdd_nb_permis_uni_dummy$tab)
+```
+
+### [Permis : binaire] kernel tri
+
+```{r}
+print(rdd_nb_permis_tri_dummy$tab)
+```
+
+
+### [Surface créée] kernel uni
 
 ```{r}
 print(rdd_surf_uni$tab)
 ```
 
-### [Surface crée] kernel tri
+### [Surface créée] kernel tri
 
 ```{r}
 print(rdd_surf_tri$tab)
+```
+
+
+### [Surface créée : binaire] kernel uni
+
+```{r}
+print(rdd_surf_uni_dummy$tab)
+```
+
+### [Surface créée : binaire] kernel tri
+
+```{r}
+print(rdd_surf_tri_dummy$tab)
 ```
 
 ### [Surface moyenne] kernel uni
