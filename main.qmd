@@ -145,15 +145,13 @@ print(moyennes_par_couleur_muni$moyenne_nb_permis)
 
 ## Nombre de permis durant le mandat par commune, par couleur politique et par début de mandat
 ```{r}
-moyennes_par_couleur_muni %>% 
+tab_nb_permis_surf <- moyennes_par_couleur_muni %>% 
     arrange(election) %>% 
-    group_by(election) %>% mutate(
-    rang1_Nuance = recode(
-      rang1_Nuance,
-      "-1" = "Gauche",
-      "1" = "Droite"
-    )
-  ) %>% 
+    group_by(election) %>% 
+    mutate(rang1_Nuance = recode(
+                      rang1_Nuance,
+                      "-1" = "Gauche",
+                      "1" = "Droite")) %>% 
     gt() %>% 
     tab_header(
       title = "Nombre moyen de permis et surface moyenne durant le mandat",
@@ -165,7 +163,7 @@ moyennes_par_couleur_muni %>%
   ) %>% 
   fmt_number(
     columns = c(moyenne_nb_permis),
-    decimals = 1,
+    decimals = 2,
     dec_mark = ",") %>% 
   fmt_number(
     columns = c(moyenne_surface),
@@ -173,6 +171,9 @@ moyennes_par_couleur_muni %>%
     sep_mark = " ",
     dec_mark = ","
   )
+
+tab_nb_permis_surf
+# pour avoir en latex : cat(as_latex(tab_nb_permis_surf))
 ```
 
 
@@ -193,6 +194,39 @@ hist_variable(gdf_RDD, nb_permis, titre_variable = "du nombre de permis")
 hist_variable(gdf_RDD, delta_score_1, titre_variable = "du delta de score")
 ```
 
+
+
+## Nombre d'observations sans contrainte de seuil
+```{r,echo=FALSE,warning=FALSE}
+
+nb_obs_ss_seuil <- gdf_RDD %>%
+                  arrange(election) %>%
+                  group_by(election) %>%
+                  mutate(rang1_Nuance = recode(
+                    rang1_Nuance,
+                    "-1" = "Gauche",
+                    "1" = "Droite"
+                  )) %>%
+                  summarise(n = n(), .groups = "drop") %>%
+                  gt() %>%
+                  tab_header(
+                    title = "Nombre d'observations par couleur politique et élection",
+                    subtitle = "Résumé des effectifs"
+                  ) %>%
+                  cols_label(
+                    rang1_Nuance = "Couleur politique",
+                    election = "Année de l'élection",
+                    n = "Nombre d'observations"
+                  ) %>%
+                  fmt_number(
+                    columns = n,
+                    decimals = 0,
+                    sep_mark = " ",
+                    dec_mark = ","
+                  )
+
+print(nb_obs_ss_seuil)
+```
 
 :::
 
