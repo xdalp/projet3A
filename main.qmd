@@ -162,6 +162,16 @@ moyennes_par_couleur_muni %>%
     rang1_Nuance = "Couleur politique",
     moyenne_nb_permis = "Nombre moyen de permis",
     moyenne_surface = "Surface moyenne des permis de construire"
+  ) %>% 
+  fmt_number(
+    columns = c(moyenne_nb_permis),
+    decimals = 1,
+    dec_mark = ",") %>% 
+  fmt_number(
+    columns = c(moyenne_surface),
+    decimals = 0,
+    sep_mark = " ",
+    dec_mark = ","
   )
 ```
 
