@@ -143,16 +143,26 @@ moyennes_par_couleur_muni = gdf_RDD %>%
 print(moyennes_par_couleur_muni$moyenne_nb_permis)
 ```
 
-## Nombre de permis durant le mandat par commune, par couleur politique
+## Nombre de permis durant le mandat par commune, par couleur politique et par début de mandat
 ```{r}
 moyennes_par_couleur_muni %>% 
     arrange(election) %>% 
-    group_by(election) %>%
+    group_by(election) %>% mutate(
+    rang1_Nuance = recode(
+      rang1_Nuance,
+      "-1" = "Gauche",
+      "1" = "Droite"
+    )
+  ) %>% 
     gt() %>% 
     tab_header(
       title = "Nombre moyen de permis et surface moyenne durant le mandat",
       subtitle = "Par couleur politique"
-    )
+    )  %>% cols_label(
+    rang1_Nuance = "Couleur politique",
+    moyenne_nb_permis = "Nombre moyen de permis",
+    moyenne_surface = "Surface moyenne des permis de construire"
+  )
 ```
 
 
