@@ -34,6 +34,7 @@ lapply(packages, install_if_missing)
 #| echo: false
 #| output: false
 library(viridis)
+library(data.table)
 library(dotenv)
 library(ggplot2)
 library(dplyr)
@@ -157,40 +158,132 @@ hist_variable(gdf_RDD, nb_permis, titre_variable = "du nombre de permis")
 
 ::: {.panel-tabset}
 
+
+### Clusters 
+
+```{r,echo=FALSE,WARNING=FALSE,eval=FALSE}
+
+library(rnaturalearth)
+
+# Années à visualiser
+annees_plot <- c(2014, 2020, 2025)
+
+# 1️⃣ Supprimer Z et projeter en WGS84
+df_cluster_xy <- df_cluster %>%
+
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 4326)  # lat/lon
+
+# 2️⃣ Fonction pour un point aléatoire par cluster (colonne geom)
+get_cluster_random_point <- function(df_sf, annee) {
+  col_cluster <- paste0("cluster_id_", annee)
+  df_sf %>%
+    filter(.data[[col_cluster]] > 0) %>%     # ignore cluster -1
+    group_by(cluster_id = .data[[col_cluster]]) %>%
+    slice_sample(n = 1) %>%                  # un bâtiment aléatoire par cluster
+    summarise(
+      n_bat = n(),                            # nb de bâtiments par cluster
+      geom = geom[1]                          # garder le geom du bâtiment choisi
+    ) %>%
+    mutate(Annee = annee) %>%
+    ungroup()
+}
+
+# 3️⃣ Calculer les clusters pour toutes les années
+clusters_list <- lapply(annees_plot, function(a) get_cluster_random_point(df_cluster_xy, a))
+clusters_points <- do.call(rbind, clusters_list)
+
+# 4️⃣ Carte de France
+france <- ne_countries(scale = "medium", country = "France", returnclass = "sf") %>%
+  st_transform(crs = 4326)
+
+# 5️⃣ Tracer les clusters
+graph<-ggplot() +
+  geom_sf(data = france, fill = "gray95", color = "black") +
+  geom_sf(
+    data = clusters_points,
+    aes(size = n_bat, color = factor(Annee)),
+    alpha = 0.6
+  ) +
+  scale_color_viridis_d(option = "viridis", name = "Année") +
+  scale_size(range = c(2, 8), name = "Nb de bâtiments") +
+  facet_wrap(~Annee) +
+  labs(title = "Clusters de bâtiments en France (point aléatoire par cluster)") +
+  coord_sf(xlim = c(-5, 10), ylim = c(41, 51)) +  # centrer sur la métropole
+  theme_minimal(base_size = 14)
+
+ggplotly(graph)
+```
+
+
+```{r,echo=FALSE,WARNING=FALSE}
+# Les années à visualiser
+annees_plot <- c(2014, 2020, 2025)
+
+dt <- as.data.table(df_cluster)
+cols_plot <- paste0("cluster_id_", annees_plot)
+
+plot_data <- melt(
+  dt,
+  id.vars = NULL,
+  measure.vars = cols_plot,
+  variable.name = "cluster_col",
+  value.name = "cluster_value"
+)[cluster_value > 0]
+
+plot_data[, Annee := as.integer(sub("cluster_id_", "", cluster_col))]
+plot_data <- plot_data[, .(cluster_size = .N), by = .(Annee, cluster_value)]
+plot_data[, cluster_size_norm := cluster_size / sum(cluster_size), by = Annee] #normalisation 
+
+summary_table <- plot_data[, .(
+  mean_cluster_size = mean(cluster_size),
+  mean_cluster_size_norm = mean(cluster_size_norm)
+), by = Annee]
+
+summary_table
+
+#et si on plot des distrib très proches
+
+```
+
 ### Permis x clusters 
 
 ```{r,echo=FALSE,warning=FALSE}
 
 colors_veridis <- viridis(11, option = "viridis")[c(3, 9)]   
-
 seuil <- 1000
 
-graph<- df_cluster %>%
+graph_df <- df_cluster %>%
   filter(Base == "Sitadel", SURF_CREEE > seuil) %>%
-  st_set_geometry(NULL) %>%  # supprime la géométrie pour éviter WKB errors
+  st_set_geometry(NULL) %>%
   rowwise() %>%
   mutate(cluster_dyn = cur_data()[[paste0("cluster_id_", Annee_REF)]]) %>%
   ungroup() %>%
   group_by(Annee = Annee_REF) %>%
   summarise(
-    pct_cluster_stat1 = mean(cluster_id > 0) * 100,
-    pct_cluster_stat2 = mean(cluster_dyn > 0) * 100,
+    pct_cluster_stat2 = mean(cluster_id > 0) * 100,
+    pct_cluster_stat1 = mean(cluster_dyn > 0) * 100,
     .groups = "drop"
   ) %>%
-  pivot_longer(-Annee, names_to = "stat", values_to = "pct")%>%
-  ggplot(aes(x = Annee, y = pct, color = stat)) +
+  pivot_longer(-Annee, names_to = "stat", values_to = "pct") %>%
+  mutate(
+    # Recode et forcer factor avec niveaux dans le bon ordre
+    stat = factor(stat, levels = c("pct_cluster_stat1", "pct_cluster_stat2"),
+                  labels = c(
+                    "Insertion dans un cluster à la date d'autorisation",
+                    "Insertion dans un cluster en 2025"
+                  ))
+  )
+
+graph <- ggplot(graph_df, aes(x = Annee, y = pct, color = stat)) +
   geom_line(size = 1.2) +
   geom_point(size = 2) +
   scale_color_manual(
     values = c(
-      "pct_cluster_stat1" = colors_veridis[2],  # vert
-      "pct_cluster_stat2" = colors_veridis[1]   # violet
+      "Insertion dans un cluster à la date d'autorisation" = colors_veridis[2],
+      "Insertion dans un cluster en 2025" = colors_veridis[1]
     ),
-    labels = c(
-      "pct_cluster_stat1" = "Insertion dans un cluster à la date d'autorisation",
-      "pct_cluster_stat2" = "Insertion dans un cluster en 2025"
-    ),
-    name = ""  # vide pour enlever le titre de légende
+    name = ""
   ) +
   labs(
     x = "Année",
@@ -198,13 +291,13 @@ graph<- df_cluster %>%
   ) +
   theme_minimal(base_size = 14) +
   theme(
-    legend.position = "bottom",        # légende sous le graphique
+    legend.position = "bottom",
     legend.text = element_text(size = 12),
     legend.key.width = unit(2, "lines")
   )
 
+# Convertir en Plotly interactif
 ggplotly(graph)
-
 ```
 
 
@@ -251,6 +344,7 @@ ggplotly(distrib_vote(df_vote)) %>% layout(legend = list(orientation = "h",x = 0
 ```{r,echo=FALSE,warning=FALSE}
 ggplotly(distrib_vote(gdf_RDD)) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
 ```
+
 
 
 ### Duels au seuil seulement
