@@ -33,6 +33,7 @@ lapply(packages, install_if_missing)
 ```{r}
 #| echo: false
 #| output: false
+library(viridis)
 library(dotenv)
 library(ggplot2)
 library(dplyr)
@@ -46,8 +47,6 @@ library(tidyverse)
 library(rlang)
 
 ```
-
-
 
 
 ```{r import_donnees}
@@ -74,6 +73,12 @@ gdf_RDD<-get_s3_csv("mgarbe",remote_path) %>%
 remote_path_elec="Elections/donnees_duel_maires_wide.csv"
 df_vote <- get_s3_csv("mgarbe", remote_path_elec, delim_csv = ",") %>% 
           mutate(election = factor(gsub("_muni", "", election))) 
+
+
+#Télécharger les données cluster 
+remote_path_cluster="Sitadel/df_POSTclustering_fulldep_1000m3.gpkg"
+df_cluster <- get_s3_gpkg("mgarbe", remote_path_cluster) 
+
 ```
 
 ```{r}
@@ -86,10 +91,6 @@ seuil <- 8
 gdf_RDD_seuil <- gdf_RDD %>% filter(abs(delta_score_1) < seuil)
 ```
 
-
-# Statistiques descriptives sur l'ensemble des communes
-
-::: {.panel-tabset}
 
 ```{r,echo=FALSE,warning=FALSE}
 hist_variable <- function(data, variable,  titre_variable = NULL,bins = 50) {
@@ -133,7 +134,180 @@ hist_variable <- function(data, variable,  titre_variable = NULL,bins = 50) {
 ```
 
 
-## Nouvelle surface moyenne créée durant le mandat par commune, par couleur politique
+
+# Statistiques descriptives 
+
+## Distributions Bati 
+
+::: {.panel-tabset}
+
+### Surface crée
+```{r,echo=FALSE,warning=FALSE}
+hist_variable(gdf_RDD, surface_creee, titre_variable = "de la surface créée")
+```
+
+### Permis
+```{r,echo=FALSE,warning=FALSE}
+hist_variable(gdf_RDD, nb_permis, titre_variable = "du nombre de permis")
+```
+
+:::
+
+## Etude du clustering
+
+::: {.panel-tabset}
+
+### Permis x clusters 
+
+```{r,echo=FALSE,warning=FALSE}
+
+colors_veridis <- viridis(11, option = "viridis")[c(3, 9)]   
+
+seuil <- 1000
+
+graph<- df_cluster %>%
+  filter(Base == "Sitadel", SURF_CREEE > seuil) %>%
+  st_set_geometry(NULL) %>%  # supprime la géométrie pour éviter WKB errors
+  rowwise() %>%
+  mutate(cluster_dyn = cur_data()[[paste0("cluster_id_", Annee_REF)]]) %>%
+  ungroup() %>%
+  group_by(Annee = Annee_REF) %>%
+  summarise(
+    pct_cluster_stat1 = mean(cluster_id > 0) * 100,
+    pct_cluster_stat2 = mean(cluster_dyn > 0) * 100,
+    .groups = "drop"
+  ) %>%
+  pivot_longer(-Annee, names_to = "stat", values_to = "pct")%>%
+  ggplot(aes(x = Annee, y = pct, color = stat)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  scale_color_manual(
+    values = c(
+      "pct_cluster_stat1" = colors_veridis[2],  # vert
+      "pct_cluster_stat2" = colors_veridis[1]   # violet
+    ),
+    labels = c(
+      "pct_cluster_stat1" = "Insertion dans un cluster à la date d'autorisation",
+      "pct_cluster_stat2" = "Insertion dans un cluster en 2025"
+    ),
+    name = ""  # vide pour enlever le titre de légende
+  ) +
+  labs(
+    x = "Année",
+    y = "%"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "bottom",        # légende sous le graphique
+    legend.text = element_text(size = 12),
+    legend.key.width = unit(2, "lines")
+  )
+
+ggplotly(graph)
+
+```
+
+
+
+:::
+
+
+## Répartition des votes
+
+::: {.panel-tabset}
+
+```{r,echo=FALSE,warning=FALSE}
+distrib_vote <- function(df){
+graph <- df %>%  
+  ggplot(aes(
+    x = rang1_voix_pct,
+    color = election,
+    fill  = election
+  )) +
+  geom_density(alpha=0.3,linewidth = 0.5, show.legend = FALSE) +
+   scale_color_manual(
+      values = c(
+        "2014" = brewer.pal(11, "RdBu")[1],   # bleu extrême
+        "2020" = brewer.pal(11, "RdBu")[11]   # rouge extrême
+      )
+    ) +
+  labs(
+    x = "Pourcentage de voix obtenu par le gagnant",
+    y = "Densité",
+    color = "Année"
+  ) +
+  theme_minimal()
+return(graph)
+} 
+```
+
+### Toutes les communes
+
+```{r,echo=FALSE,warning=FALSE}
+ggplotly(distrib_vote(df_vote)) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
+```
+
+### Duels DVG/DVD seulement
+```{r,echo=FALSE,warning=FALSE}
+ggplotly(distrib_vote(gdf_RDD)) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
+```
+
+
+### Duels au seuil seulement
+
+```{r,echo=FALSE,warning=FALSE}
+ggplotly(distrib_vote(gdf_RDD_seuil)) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
+```
+
+
+### Distrib "delta" du score
+```{r,echo=FALSE,warning=FALSE}
+#avance du candidat de droite par rapport au candidat de gauche
+hist_variable(gdf_RDD, delta_score_1, titre_variable = "du delta de score")
+```
+
+
+### Nb obs sans contrainte de seuil
+```{r,echo=FALSE,warning=FALSE}
+
+nb_obs_ss_seuil <- gdf_RDD %>%
+                  arrange(election) %>%
+                  mutate(rang1_Nuance = recode(
+                    rang1_Nuance,
+                    "-1" = "Gauche",
+                    "1" = "Droite"
+                  )) %>%
+                  group_by(election,rang1_Nuance) %>%
+                  summarise(n = n(), .groups = "drop") %>%
+                  gt() %>%
+                  tab_header(
+                    title = "Nombre d'observations par couleur politique et élection",
+                    subtitle = "Résumé des effectifs"
+                  ) %>%
+                  cols_label(
+                    rang1_Nuance = "Couleur politique",
+                    election = "Année de l'élection",
+                    n = "Nombre d'observations"
+                  ) %>%
+                  fmt_number(
+                    columns = n,
+                    decimals = 0,
+                    sep_mark = " ",
+                    dec_mark = ","
+                  )
+
+print(nb_obs_ss_seuil)
+```
+
+
+:::
+
+
+## Bati x vote 
+
+::: {.panel-tabset}
+
+### Surface moyenne créée 
 ```{r}
 moyennes_par_couleur_muni = gdf_RDD %>%
                       group_by(rang1_Nuance, election) %>%
@@ -143,7 +317,7 @@ moyennes_par_couleur_muni = gdf_RDD %>%
 print(moyennes_par_couleur_muni$moyenne_nb_permis)
 ```
 
-## Nombre de permis durant le mandat par commune, par couleur politique et par début de mandat
+### Nb de permis autorisés
 ```{r}
 tab_nb_permis_surf <- moyennes_par_couleur_muni %>% 
     arrange(election) %>% 
@@ -174,108 +348,6 @@ tab_nb_permis_surf <- moyennes_par_couleur_muni %>%
 
 tab_nb_permis_surf
 # pour avoir en latex : cat(as_latex(tab_nb_permis_surf))
-```
-
-
-
-## Distribution de la surface créée
-```{r,echo=FALSE,warning=FALSE}
-hist_variable(gdf_RDD, surface_creee, titre_variable = "de la surface créée")
-```
-
-## Distribution du nombre de permis
-```{r,echo=FALSE,warning=FALSE}
-hist_variable(gdf_RDD, nb_permis, titre_variable = "du nombre de permis")
-```
-
-
-## Distribution du "delta" du score (avance du candidat de droite par rapport au candidat de gauche)
-```{r,echo=FALSE,warning=FALSE}
-hist_variable(gdf_RDD, delta_score_1, titre_variable = "du delta de score")
-```
-
-
-
-## Nombre d'observations sans contrainte de seuil
-```{r,echo=FALSE,warning=FALSE}
-
-nb_obs_ss_seuil <- gdf_RDD %>%
-                  arrange(election) %>%
-                  group_by(election) %>%
-                  mutate(rang1_Nuance = recode(
-                    rang1_Nuance,
-                    "-1" = "Gauche",
-                    "1" = "Droite"
-                  )) %>%
-                  summarise(n = n(), .groups = "drop") %>%
-                  gt() %>%
-                  tab_header(
-                    title = "Nombre d'observations par couleur politique et élection",
-                    subtitle = "Résumé des effectifs"
-                  ) %>%
-                  cols_label(
-                    rang1_Nuance = "Couleur politique",
-                    election = "Année de l'élection",
-                    n = "Nombre d'observations"
-                  ) %>%
-                  fmt_number(
-                    columns = n,
-                    decimals = 0,
-                    sep_mark = " ",
-                    dec_mark = ","
-                  )
-
-print(nb_obs_ss_seuil)
-```
-
-:::
-
-
-## Répartition des votes
-
-::: {.panel-tabset}
-
-```{r}
-distrib_vote <- function(df){
-graph <- df %>%  
-  ggplot(aes(
-    x = rang1_voix_pct,
-    color = election,
-    fill  = election
-  )) +
-  geom_density(alpha=0.3,linewidth = 0.5, show.legend = FALSE) +
-   scale_color_manual(
-      values = c(
-        "2014" = brewer.pal(11, "RdBu")[1],   # bleu extrême
-        "2020" = brewer.pal(11, "RdBu")[11]   # rouge extrême
-      )
-    ) +
-  labs(
-    x = "Pourcentage de voix obtenu par le gagnant",
-    y = "Densité",
-    color = "Année"
-  ) +
-  theme_minimal()
-return(graph)
-} 
-```
-
-## Toutes les communes
-
-```{r,echo=FALSE,warning=FALSE}
-ggplotly(distrib_vote(df_vote)) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
-```
-
-## Duels DVG/DVD seulement
-```{r,echo=FALSE,warning=FALSE}
-ggplotly(distrib_vote(gdf_RDD)) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
-```
-
-
-## Duels au seuil seulement
-
-```{r,echo=FALSE,warning=FALSE}
-ggplotly(distrib_vote(gdf_RDD_seuil)) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
 ```
 
 
