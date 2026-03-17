@@ -18,7 +18,8 @@ execute:
 packages <- c("dplyr", "ggplot2", "reticulate",
               "rdrobust","dotenv","plotly","shiny", 
               "dotenv","RColorBrewer","tidyverse",
-              "sf", "gt") #carto
+              "sf", "gt"
+              "viridis","rnaturalearth","rnaturalearthdata") #carto
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -33,6 +34,10 @@ lapply(packages, install_if_missing)
 ```{r}
 #| echo: false
 #| output: false
+#| library(rnaturalearth)
+library(sf)
+library(ggplot2)
+library(rnaturalearth)
 library(viridis)
 library(data.table)
 library(dotenv)
@@ -161,58 +166,84 @@ hist_variable(gdf_RDD, nb_permis, titre_variable = "du nombre de permis")
 
 ### Clusters 
 
-```{r,echo=FALSE,WARNING=FALSE,eval=FALSE}
+```{r,echo=FALSE,WARNING=FALSE}
 
-library(rnaturalearth)
+annees_plot <- c(2025)
 
-# Années à visualiser
-annees_plot <- c(2014, 2020, 2025)
+# préparer géométrie
+df_sf <- st_zm(df_cluster, drop = TRUE)
+df_sf <- st_transform(df_sf, 4326)
 
-# 1️⃣ Supprimer Z et projeter en WGS84
-df_cluster_xy <- df_cluster %>%
+dt <- as.data.table(df_sf)
 
-  st_zm(drop = TRUE, what = "ZM") %>%
-  st_transform(crs = 4326)  # lat/lon
+# colonnes cluster à utiliser
+cols <- paste0("cluster_id_", annees_plot)
 
-# 2️⃣ Fonction pour un point aléatoire par cluster (colonne geom)
-get_cluster_random_point <- function(df_sf, annee) {
-  col_cluster <- paste0("cluster_id_", annee)
-  df_sf %>%
-    filter(.data[[col_cluster]] > 0) %>%     # ignore cluster -1
-    group_by(cluster_id = .data[[col_cluster]]) %>%
-    slice_sample(n = 1) %>%                  # un bâtiment aléatoire par cluster
-    summarise(
-      n_bat = n(),                            # nb de bâtiments par cluster
-      geom = geom[1]                          # garder le geom du bâtiment choisi
-    ) %>%
-    mutate(Annee = annee) %>%
-    ungroup()
-}
+# passage en format long
+dt_long <- melt(
+  dt,
+  measure.vars = cols,
+  variable.name = "annee_col",
+  value.name = "cluster_id"
+)
 
-# 3️⃣ Calculer les clusters pour toutes les années
-clusters_list <- lapply(annees_plot, function(a) get_cluster_random_point(df_cluster_xy, a))
-clusters_points <- do.call(rbind, clusters_list)
+# récupérer année
+dt_long[, Annee := as.integer(sub("cluster_id_", "", annee_col))]
 
-# 4️⃣ Carte de France
-france <- ne_countries(scale = "medium", country = "France", returnclass = "sf") %>%
-  st_transform(crs = 4326)
+# garder uniquement les clusters
+dt_long <- dt_long[cluster_id > 0]
 
-# 5️⃣ Tracer les clusters
-graph<-ggplot() +
-  geom_sf(data = france, fill = "gray95", color = "black") +
+# taille des clusters
+cluster_sizes <- dt_long[
+  ,
+  .(n_bat = .N),
+  by = .(Annee, cluster_id)
+]
+
+# point aléatoire dans chaque cluster
+cluster_points <- dt_long[
+  ,
+  .SD[sample(.N, 1)],
+  by = .(Annee, cluster_id)
+][
+  ,
+  .(Annee, cluster_id, geom)
+]
+
+# joindre taille + point
+clusters_map <- left_join(
+  cluster_points,
+  cluster_sizes,
+  by = c("Annee", "cluster_id")
+)
+
+clusters_map <- st_as_sf(clusters_map)
+clusters_map <- st_point_on_surface(clusters_map) 
+
+# carte France
+france <- ne_countries(
+  scale = "medium",
+  country = "France",
+  returnclass = "sf"
+) |> st_transform(4326)
+
+carte<-ggplot() +
+  geom_sf(data = france, fill = "grey95", color = "black") +
   geom_sf(
-    data = clusters_points,
+    data = clusters_map,
     aes(size = n_bat, color = factor(Annee)),
-    alpha = 0.6
+    alpha = 0.7
   ) +
   scale_color_viridis_d(option = "viridis", name = "Année") +
-  scale_size(range = c(2, 8), name = "Nb de bâtiments") +
-  facet_wrap(~Annee) +
-  labs(title = "Clusters de bâtiments en France (point aléatoire par cluster)") +
-  coord_sf(xlim = c(-5, 10), ylim = c(41, 51)) +  # centrer sur la métropole
+  scale_size(
+    range = c(0.5, 10),
+    breaks = c(10,20,50, 100, 500, 1000),
+    name = "Nb bâtiments")+
+  #facet_wrap(~Annee) +
+  coord_sf(xlim = c(-5, 10), ylim = c(41, 51)) +
   theme_minimal(base_size = 14)
 
-ggplotly(graph)
+carte
 ```
 
 
