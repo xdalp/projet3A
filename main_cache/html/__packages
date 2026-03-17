@@ -18,3 +18,7 @@ aws.s3
 sf
 gt
 rlang
+rnaturalearth
+viridisLite
+viridis
+data.table

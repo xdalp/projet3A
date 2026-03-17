@@ -8,6 +8,10 @@ format:
     self-contained: true
 execute: 
     echo: false
+    warning: false
+    message: false
+    cache: true
+    cache-dir: _cache
 ---
 
 
@@ -18,7 +22,7 @@ execute:
 packages <- c("dplyr", "ggplot2", "reticulate",
               "rdrobust","dotenv","plotly","shiny", 
               "dotenv","RColorBrewer","tidyverse",
-              "sf", "gt"
+              "sf", "gt",
               "viridis","rnaturalearth","rnaturalearthdata") #carto
 
 # Installer seulement ceux qui ne sont pas déjà installés
@@ -34,7 +38,7 @@ lapply(packages, install_if_missing)
 ```{r}
 #| echo: false
 #| output: false
-#| library(rnaturalearth)
+library(rnaturalearth)
 library(sf)
 library(ggplot2)
 library(rnaturalearth)
@@ -164,9 +168,58 @@ hist_variable(gdf_RDD, nb_permis, titre_variable = "du nombre de permis")
 ::: {.panel-tabset}
 
 
-### Clusters 
+### Dynamique
 
-```{r,echo=FALSE,WARNING=FALSE}
+```{r}
+seuil <- 1000
+
+# Nb de clusters par année (Sitadel)
+clusters_count <- df_cluster %>%
+  filter(Base == "BDTOPO", SURF_CREEE > seuil) %>%
+  st_set_geometry(NULL) %>%
+  select(starts_with("cluster_id_")) %>%
+  pivot_longer(cols = everything(), names_to = "annee", values_to = "cluster_id") %>%
+  mutate(annee = as.integer(sub("cluster_id_", "", annee))) %>%
+  filter(cluster_id > 0) %>%
+  group_by(annee) %>%
+  summarise(nb_clusters = n_distinct(cluster_id)) %>%
+  arrange(annee) %>%
+  mutate(nb_clusters = nb_clusters/ nb_clusters[annee == 2014] *100)
+
+# Cumul de bâtiments (BDTOPO)
+batiments_cum <- df_cluster %>%
+  filter(Base == "BDTOPO", SURF_CREEE > seuil) %>%
+  group_by(ID) %>%
+  filter(Annee_REF == min(Annee_REF)) %>%  
+  ungroup() %>%
+  st_set_geometry(NULL) %>%                # retirer la géométrie
+  count(Annee_REF) %>%                     
+  arrange(Annee_REF) %>%
+  mutate(cum_batiments = cumsum(n)) %>%    # cumul réel des bâtiments
+  rename(annee = Annee_REF)%>%
+  mutate(cum_batiments = cum_batiments/ cum_batiments[annee == 2014]* 100)
+
+# Plot avec un seul axe
+plot<-ggplot() +
+  geom_line(data = clusters_count, aes(x = annee, y = nb_clusters, color = "Nb clusters"), size = 1.2) +
+  geom_point(data = clusters_count, aes(x = annee, y = nb_clusters, color = "Nb clusters"), size = 2) +
+  geom_line(data = batiments_cum, aes(x = annee, y = cum_batiments, color = "Cumul bâtiments"), size = 1.2) +
+  geom_point(data = batiments_cum, aes(x = annee, y = cum_batiments, color = "Cumul bâtiments"), size = 2) +
+  scale_color_manual(values = c("Nb clusters" = "#2C7FB8", "Cumul bâtiments" = "#D95F0E")) +
+  labs(
+    title = "Évolution du nombre de clusters et des bâtiments BDTOPO (base 100 en 2014)",
+    x = "Année",
+    y = "Indice (base 100)",
+    color = ""
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+ggplotly(plot)
+```
+
+### Géo 
+
+```{r,echo=FALSE,warning=FALSE}
 
 annees_plot <- c(2025)
 
@@ -247,6 +300,8 @@ carte
 ```
 
 
+### Taille des clusters
+
 ```{r,echo=FALSE,WARNING=FALSE}
 # Les années à visualiser
 annees_plot <- c(2014, 2020, 2025)
@@ -276,6 +331,15 @@ summary_table
 #et si on plot des distrib très proches
 
 ```
+
+
+:::
+
+
+## Clustering x Sitadel
+
+::: {.panel-tabset}
+
 
 ### Permis x clusters 
 
@@ -332,6 +396,112 @@ ggplotly(graph)
 ```
 
 
+### Permis in cluster 2025
+
+```{r,warning=FALSE}
+
+# 1️⃣ Définir les périodes
+periodes <- c("2014-2019", "2020-2025")
+
+# 2️⃣ Tous les départements
+url_deps <- "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
+departements_sf <- st_read(url_deps)%>%
+  mutate(DEP_CODE=as.integer(code))
+deps <- departements_sf %>% st_set_geometry(NULL) %>% select(DEP_CODE)
+
+# 3️⃣ Créer toutes les combinaisons DEP × période
+all_combinations <- expand.grid(
+  DEP_CODE = deps$DEP_CODE,
+  periode = periodes,
+  stringsAsFactors = FALSE
+)
+
+# 4️⃣ Calculer le % de bâtiments en cluster (comme avant)
+df_map_period <- df_cluster %>%
+  filter(Base == "Sitadel", SURF_CREEE > seuil) %>%
+  st_set_geometry(NULL) %>%
+  rowwise() %>%
+  mutate(cluster_dyn = cur_data()[[paste0("cluster_id_", Annee_REF)]]) %>%
+  ungroup() %>%
+  mutate(
+    periode = case_when(
+      Annee_REF >= 2014 & Annee_REF <= 2019 ~ "2014-2019",
+      Annee_REF >= 2020 & Annee_REF <= 2025 ~ "2020-2025",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(periode)) %>%
+  group_by(periode, DEP_CODE) %>%
+  summarise(
+    pct_cluster_stat1 = mean(cluster_dyn > 0) * 100,
+    .groups = "drop"
+  )
+
+# 5️⃣ Joindre les données à toutes les combinaisons (remplir les NA)
+df_map_period_full <- all_combinations %>%
+  left_join(df_map_period, by = c("DEP_CODE", "periode"))
+
+# 6️⃣ Jointure avec le shapefile
+departements_sf <- departements_sf %>%
+  mutate(DEP_CODE = as.integer(code))
+
+map_data <- departements_sf %>%
+  left_join(df_map_period_full, by = "DEP_CODE")
+
+ggplot(map_data) +
+  geom_sf(aes(fill = pct_cluster_stat1), color = "white", size = 0.1) +
+  scale_fill_viridis(
+    option = "viridis",
+    direction = -1,
+    name = "% en cluster",
+    na.value = "grey90"
+  ) +
+  facet_wrap(~periode) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_text(size = 12),
+    legend.text  = element_text(size = 10)
+  )
+
+```
+
+
+### Taille
+
+```{r}
+
+#PAS BON PCQ ON VEUT LA TAILLE GLOBALE 
+clusters_global <- df_cluster %>%
+  st_set_geometry(NULL) %>%   # <-- supprime la colonne geom
+  filter(cluster_id_2025 != -1) %>%
+  group_by(cluster_id_2025) %>%
+  summarise(
+    nb_bdtopo = sum(Base == "BDTOPO"),
+    nb_sitadel = sum(Base == "Sitadel")
+  ) %>%
+  ungroup()%>%
+  pivot_longer(
+    cols = c(nb_bdtopo, nb_sitadel),
+    names_to = "Base",
+    values_to = "taille"
+  ) %>%
+  filter(taille > 0) %>%   # garder seulement les valeurs non nulles
+  mutate(Base = recode(Base, nb_bdtopo = "BDTOPO", nb_sitadel = "Sitadel"))
+
+plot<-ggplot(clusters_global, aes(x = taille, fill = Base)) +
+  geom_density(alpha = 0.5) +
+  scale_x_log10() +
+  theme_minimal() +
+  labs(
+    title = "Densité de la taille des clusters par source (2025)",
+    x = "Nombre de bâtiments dans le cluster pour cette source",
+    y = "Densité"
+  )
+
+ggplotly(plot)
+
+```
 
 :::
 
