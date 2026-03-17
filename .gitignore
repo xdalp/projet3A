@@ -1,2 +1,7 @@
 .env
 *.egg-info/
+
+# Quarto / R cache
+*_cache/
+*_files/
+main_cache/
