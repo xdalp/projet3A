@@ -246,7 +246,7 @@ pct_communes_per_mandat <- pct_communes_per_mandat %>%
 ```
 
 
-```{r}
+```{r tableau mandat}
 kable(tableau_mandat, 
       caption = "Sous-champs : communes avec une étiquette politique aux élections", 
       digits = 1) 
@@ -275,7 +275,7 @@ dens_plot(gdf_RDD, nb_permis, titre_variable = "")
 
 ### Dynamique
 
-```{r}
+```{r graph cluster par annee et cumul de batiments}
 seuil <- 1000
 
 # Nb de clusters par année (Sitadel)
@@ -329,7 +329,7 @@ plot
 
 ### Géo 
 
-```{r,echo=FALSE,warning=FALSE}
+```{r carte,echo=FALSE,warning=FALSE}
 
 annees_plot <- c(2025)
 
@@ -414,7 +414,7 @@ carte
 
 ### Taille des clusters
 
-```{r,echo=FALSE,WARNING=FALSE}
+```{r taille des clusters,echo=FALSE,WARNING=FALSE}
 # Les années à visualiser
 annees_plot <- c(2014, 2020, 2025)
 
@@ -462,7 +462,7 @@ kable(summary_table,
 
 ### Matching
 
-```{r}
+```{r matching}
 df_plot <- df_match_Sitadel_BDTOPO %>%
   st_set_geometry(NULL) %>%
   filter(!is.na(ANNEE_REELLE_AUTORISATION)) %>%
@@ -516,7 +516,7 @@ plot
 
 ### Permis x clusters 
 
-```{r,echo=FALSE,warning=FALSE}
+```{r permis x cluster,echo=FALSE,warning=FALSE}
 
 colors_veridis <- viridis(11, option = "viridis")[c(3, 9)]   
 seuil <- 1000
@@ -571,7 +571,7 @@ ggplotly(graph)%>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "ce
 
 ### Permis in cluster 2025
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r permis dans cluster 2025, echo=FALSE, message=FALSE, warning=FALSE}
 
 # 1️⃣ Définir les périodes
 periodes <- c("2014-2020", "2020-2025")
