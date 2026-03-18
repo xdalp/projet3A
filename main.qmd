@@ -938,6 +938,39 @@ rdd_report <- function(data, outcome_var, kernel, effet_fixe = NULL,elections= c
 ```
 
 
+```{r}
+#RDD clustring
+df_RDD_cluster<-df_cluster %>%
+  filter(Base == "Sitadel", SURF_CREEE > seuil) %>%
+  st_set_geometry(NULL) %>%
+  rowwise() %>%
+  mutate(cluster_dyn = cur_data()[[paste0("cluster_id_", Annee_REF)]]) %>%
+  ungroup() %>%
+  mutate(
+    election = case_when(
+      Annee_REF >= 2014 & Annee_REF <= 2019 ~ 2014,
+      Annee_REF >= 2020 & Annee_REF <= 2025 ~ 2020,
+      TRUE ~ NA
+    )
+  ) %>%
+  filter(!is.na(election)) %>%
+  mutate(
+    COMM = as.character(COMM),           # convertir en texte
+    COMM = str_pad(COMM, width = 5, pad = "0")  # ajouter un 0 devant si nécessaire
+  ) %>%
+  rename(`Code INSEE`=COMM)%>%
+  group_by(election, `Code INSEE`) %>%
+  summarise(
+    pct_cluster_aut = mean(cluster_dyn > 0) * 100,
+    pct_cluster_2025 = mean(cluster_id > 0) * 100,
+    .groups = "drop"
+  )%>%
+  mutate(election=factor(election))
+
+gdf_RDD_seuil<-gdf_RDD_seuil %>%
+  left_join(df_RDD_cluster, by = c("Code INSEE", "election"))
+```
+
 ## Figures
 
 ```{r fig_rdd,echo=FALSE,cache=TRUE}
@@ -956,6 +989,10 @@ rdd_nb_permis_tri_dummy <- rdd_report(gdf_RDD_seuil,"dummy_permis", kernel = "tr
 #surface moyenne 
 rdd_surf_moy_uni <- rdd_report(gdf_RDD_seuil,"surface_moyenne", kernel = "uni") 
 rdd_surf_moy_tri <- rdd_report(gdf_RDD_seuil,"surface_moyenne", kernel = "tri") 
+
+#cluster pct 
+rdd_cluster_pct_uni <- rdd_report(gdf_RDD_seuil,"pct_cluster_aut", kernel = "uni") 
+rdd_cluster_pct_tri <- rdd_report(gdf_RDD_seuil,"pct_cluster_aut", kernel = "tri") 
 ```
 
 ::: {.panel-tabset}
@@ -1008,7 +1045,22 @@ print(rdd_surf_moy_uni$plot)
 print(rdd_surf_moy_tri$plot)
 ```
 
+
+### [Pct cluster] kernel uni
+
+```{r}
+print(rdd_cluster_pct_uni$plot)
+```
+
+### [Pct cluster] kernel tri
+
+```{r}
+print(rdd_cluster_pct_tri$plot)
+```
+
+
 :::
+
 
 
 ## Tables
@@ -1068,3 +1120,4 @@ print(rdd_surf_moy_tri$tab)
 ```
 
 :::
+
