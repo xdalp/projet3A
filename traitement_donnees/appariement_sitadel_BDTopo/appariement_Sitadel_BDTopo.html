@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Traitement sitadel</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="appariement_Sitadel_BDTopo_files/libs/clipboard/clipboard.min.js"></script>
+<script src="appariement_Sitadel_BDTopo_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="appariement_Sitadel_BDTopo_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="appariement_Sitadel_BDTopo_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="appariement_Sitadel_BDTopo_files/libs/quarto-html/popper.min.js"></script>
+<script src="appariement_Sitadel_BDTopo_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="appariement_Sitadel_BDTopo_files/libs/quarto-html/anchor.min.js"></script>
+<link href="appariement_Sitadel_BDTopo_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="appariement_Sitadel_BDTopo_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="appariement_Sitadel_BDTopo_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="appariement_Sitadel_BDTopo_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="appariement_Sitadel_BDTopo_files/libs/bootstrap/bootstrap-42e597f4a20740e0c111de601fa59cf5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Traitement sitadel</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="680099d4" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install <span class="op">-</span>r requirements.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Requirement already satisfied: geopandas in /opt/python/lib/python3.13/site-packages (from -r requirements.txt (line 1)) (1.1.1)
+Requirement already satisfied: pandas in /opt/python/lib/python3.13/site-packages (from -r requirements.txt (line 2)) (2.3.3)
+Requirement already satisfied: numpy in /opt/python/lib/python3.13/site-packages (from -r requirements.txt (line 3)) (2.3.5)
+Requirement already satisfied: shapely in /opt/python/lib/python3.13/site-packages (from -r requirements.txt (line 4)) (2.1.2)
+Requirement already satisfied: matplotlib in /opt/python/lib/python3.13/site-packages (from -r requirements.txt (line 5)) (3.10.7)
+Requirement already satisfied: requests in /opt/python/lib/python3.13/site-packages (from -r requirements.txt (line 6)) (2.32.5)
+Requirement already satisfied: beautifulsoup4 in /opt/python/lib/python3.13/site-packages (from -r requirements.txt (line 7)) (4.14.3)
+Requirement already satisfied: boto3 in /opt/python/lib/python3.13/site-packages (from -r requirements.txt (line 8)) (1.42.0)
+Requirement already satisfied: py7zr in /opt/python/lib/python3.13/site-packages (from -r requirements.txt (line 9)) (1.0.0)
+Requirement already satisfied: rtree in /opt/python/lib/python3.13/site-packages (from -r requirements.txt (line 10)) (1.4.1)
+Requirement already satisfied: pyogrio&gt;=0.7.2 in /opt/python/lib/python3.13/site-packages (from geopandas-&gt;-r requirements.txt (line 1)) (0.12.1)
+Requirement already satisfied: packaging in /opt/python/lib/python3.13/site-packages (from geopandas-&gt;-r requirements.txt (line 1)) (25.0)
+Requirement already satisfied: pyproj&gt;=3.5.0 in /opt/python/lib/python3.13/site-packages (from geopandas-&gt;-r requirements.txt (line 1)) (3.7.2)
+Requirement already satisfied: python-dateutil&gt;=2.8.2 in /opt/python/lib/python3.13/site-packages (from pandas-&gt;-r requirements.txt (line 2)) (2.9.0.post0)
+Requirement already satisfied: pytz&gt;=2020.1 in /opt/python/lib/python3.13/site-packages (from pandas-&gt;-r requirements.txt (line 2)) (2025.2)
+Requirement already satisfied: tzdata&gt;=2022.7 in /opt/python/lib/python3.13/site-packages (from pandas-&gt;-r requirements.txt (line 2)) (2025.2)
+Requirement already satisfied: contourpy&gt;=1.0.1 in /opt/python/lib/python3.13/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (1.3.3)
+Requirement already satisfied: cycler&gt;=0.10 in /opt/python/lib/python3.13/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (0.12.1)
+Requirement already satisfied: fonttools&gt;=4.22.0 in /opt/python/lib/python3.13/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (4.61.0)
+Requirement already satisfied: kiwisolver&gt;=1.3.1 in /opt/python/lib/python3.13/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (1.4.9)
+Requirement already satisfied: pillow&gt;=8 in /opt/python/lib/python3.13/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (12.0.0)
+Requirement already satisfied: pyparsing&gt;=3 in /opt/python/lib/python3.13/site-packages (from matplotlib-&gt;-r requirements.txt (line 5)) (3.2.5)
+Requirement already satisfied: charset_normalizer&lt;4,&gt;=2 in /opt/python/lib/python3.13/site-packages (from requests-&gt;-r requirements.txt (line 6)) (3.4.4)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /opt/python/lib/python3.13/site-packages (from requests-&gt;-r requirements.txt (line 6)) (3.11)
+Requirement already satisfied: urllib3&lt;3,&gt;=1.21.1 in /opt/python/lib/python3.13/site-packages (from requests-&gt;-r requirements.txt (line 6)) (2.5.0)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /opt/python/lib/python3.13/site-packages (from requests-&gt;-r requirements.txt (line 6)) (2025.11.12)
+Requirement already satisfied: soupsieve&gt;=1.6.1 in /opt/python/lib/python3.13/site-packages (from beautifulsoup4-&gt;-r requirements.txt (line 7)) (2.8)
+Requirement already satisfied: typing-extensions&gt;=4.0.0 in /opt/python/lib/python3.13/site-packages (from beautifulsoup4-&gt;-r requirements.txt (line 7)) (4.15.0)
+Requirement already satisfied: botocore&lt;1.42.0,&gt;=1.41.6 in /opt/python/lib/python3.13/site-packages (from boto3-&gt;-r requirements.txt (line 8)) (1.41.6)
+Requirement already satisfied: jmespath&lt;2.0.0,&gt;=0.7.1 in /opt/python/lib/python3.13/site-packages (from boto3-&gt;-r requirements.txt (line 8)) (1.0.1)
+Requirement already satisfied: s3transfer&lt;0.17.0,&gt;=0.16.0 in /opt/python/lib/python3.13/site-packages (from boto3-&gt;-r requirements.txt (line 8)) (0.16.0)
+Requirement already satisfied: six&gt;=1.5 in /opt/python/lib/python3.13/site-packages (from python-dateutil&gt;=2.8.2-&gt;pandas-&gt;-r requirements.txt (line 2)) (1.17.0)
+Requirement already satisfied: texttable in /opt/python/lib/python3.13/site-packages (from py7zr-&gt;-r requirements.txt (line 9)) (1.7.0)
+Requirement already satisfied: pycryptodomex&gt;=3.20.0 in /opt/python/lib/python3.13/site-packages (from py7zr-&gt;-r requirements.txt (line 9)) (3.23.0)
+Requirement already satisfied: brotli&gt;=1.1.0 in /opt/python/lib/python3.13/site-packages (from py7zr-&gt;-r requirements.txt (line 9)) (1.2.0)
+Requirement already satisfied: psutil in /opt/python/lib/python3.13/site-packages (from py7zr-&gt;-r requirements.txt (line 9)) (7.1.3)
+Requirement already satisfied: pyzstd&gt;=0.16.1 in /opt/python/lib/python3.13/site-packages (from py7zr-&gt;-r requirements.txt (line 9)) (0.18.0)
+Requirement already satisfied: pyppmd&lt;1.3.0,&gt;=1.1.0 in /opt/python/lib/python3.13/site-packages (from py7zr-&gt;-r requirements.txt (line 9)) (1.2.0)
+Requirement already satisfied: pybcj&lt;1.1.0,&gt;=1.0.0 in /opt/python/lib/python3.13/site-packages (from py7zr-&gt;-r requirements.txt (line 9)) (1.0.7)
+Requirement already satisfied: multivolumefile&gt;=0.2.3 in /opt/python/lib/python3.13/site-packages (from py7zr-&gt;-r requirements.txt (line 9)) (0.2.3)
+Requirement already satisfied: inflate64&lt;1.1.0,&gt;=1.0.0 in /opt/python/lib/python3.13/site-packages (from py7zr-&gt;-r requirements.txt (line 9)) (1.0.4)</code></pre>
+</div>
+</div>
+<div id="b418ed2a" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>run Sitadel2_traitement.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/home/onyxia/work/projet3A/Sitadel2_traitement.py:22: DtypeWarning: Columns (0,2,4,7,11,17,19,20,21,23,29,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98) have mixed types. Specify dtype option on import or set low_memory=False.
+  df = pd.read_csv(tmp, sep=";")
+/home/onyxia/work/projet3A/Sitadel2_traitement.py:90: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  df1000["ANNEE_REELLE_AUTORISATION"] = pd.to_datetime(</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Lancement de la requête BAN
+df_ban
+                                                 adresse    lat_BAN   lon_BAN  \
+6923                       133 RUE LECOCQ 33000 BORDEAUX  44.833275 -0.588851   
+8344                   181 RUE DE CHATILLON 35000 RENNES  48.088886 -1.672032   
+25320              282 RUE FRANCOIS PERRIN 87000 LIMOGES  45.824679  1.227735   
+602               606 BOULEVARD DU MERCANTOUR 06200 NICE  43.727756  7.185797   
+23155              501 CHAUSSEE JULES FERRY 80090 AMIENS  49.877572  2.341606   
+...                                                  ...        ...       ...   
+25847   26 RUE HENRI-AUGUSTE-DESB 0&lt;NA&gt; CORBEIL ESSONNES        NaN       NaN   
+25897                   1 ROND-POINT L'ESPACE 91007 EVRY        NaN       NaN   
+26064                                       0&lt;NA&gt; SACLAY        NaN       NaN   
+26200        RUE HENRI FABRE -PRES D'ANTONY 0&lt;NA&gt; ANTONY        NaN       NaN   
+26427  ""LES BRUYERES"" RUE DU PAVE 93290 TREMBLAY-EN...        NaN       NaN   
+
+       score_BAN                             adresse_BAN code_com_BAN  
+6923    0.985583           133 Rue Lecocq 33000 Bordeaux        33063  
+8344    0.984455       181 Rue de Châtillon 35000 Rennes        35238  
+25320   0.983775   282 rue François Perrin 87000 Limoges        87085  
+602     0.983739  606 Boulevard du Mercantour 06200 Nice        06088  
+23155   0.983651   501 Chaussée Jules Ferry 80090 Amiens        80021  
+...          ...                                     ...          ...  
+25847        NaN                                     NaN          NaN  
+25897        NaN                                     NaN          NaN  
+26064        NaN                                     NaN          NaN  
+26200        NaN                                     NaN          NaN  
+26427        NaN                                     NaN          NaN  
+
+[24209 rows x 6 columns]
+df_loc
+       DEP_CODE REG_CODE   COMM DATE_REELLE_AUTORISATION DATE_REELLE_DOC  \
+0             2       22   2028               02/07/2020             NaN   
+1             2       22   2028               22/04/2021      01/12/2021   
+2             2       22   2046               23/12/2019      23/04/2020   
+3             2       22   2046               23/09/2022             NaN   
+4             2       22   2046               27/10/2022      07/11/2022   
+...         ...      ...    ...                      ...             ...   
+26998        95       11  95680               03/04/2018             NaN   
+26999        95       11  95680               26/04/2019      11/02/2020   
+27000        95       11  95680               20/12/2019      28/05/2021   
+27001        95       11  95680               11/03/2020      29/01/2021   
+27002        95       11  95680               26/06/2024             NaN   
+
+      DATE_REELLE_DAACT NATURE_PROJET_DECLAREE I_EXTENSION  \
+0                   NaN                      1        True   
+1                   NaN                      1       False   
+2            15/02/2021                      1       False   
+3                   NaN                      1       False   
+4            04/07/2023                      1       False   
+...                 ...                    ...         ...   
+26998               NaN                      1       False   
+26999               NaN                      1       False   
+27000        27/12/2023                      1       False   
+27001        06/02/2023                      1       False   
+27002               NaN                      1       False   
+
+      DESTINATION_PRINCIPALE ADR_NUM_TER  ... SURF_IND_ISSUE_TRANSFO  \
+0                          6         NaN  ...                      0   
+1                          8         NaN  ...                      0   
+2                          6         NaN  ...                      0   
+3                          8         NaN  ...                      0   
+4                          8         730  ...                      0   
+...                      ...         ...  ...                    ...   
+26998                      6        ILOT  ...                      0   
+26999                      8         NaN  ...                      0   
+27000                      8       16-18  ...                      0   
+27001                      8        13 A  ...                      0   
+27002                      4       29-31  ...                      0   
+
+      SURF_IND_DEMOLIE SURF_IND_TRANSFORMEE ANNEE_REELLE_AUTORISATION  \
+0                    0                    0                      2020   
+1                    0                    0                      2021   
+2                    0                    0                      2019   
+3                    0                    0                      2022   
+4                    0                    0                      2022   
+...                ...                  ...                       ...   
+26998                0                    0                      2018   
+26999                0                    0                      2019   
+27000                0                    0                      2019   
+27001                0                    0                      2020   
+27002                0                    0                      2024   
+
+                                                 adresse    lat_BAN   lon_BAN  \
+0            RUE GEORGES BRASSENS 02840 ATHIES SOUS LAON  49.574288  3.675562   
+1      RUE GEORGES BRASSENS LES MINIM 02840 ATHIES-SO...  49.574288  3.675562   
+2                    ZAC DU GRIFFON 02000 BARENTON-BUGNY  49.627584  3.655399   
+3                    RUE JAMES WATT 02000 BARENTON-BUGNY  49.615140  3.658309   
+4                730 RUE JAMES WATT 02000 BARENTON-BUGNY  49.618498  3.655109   
+...                                                  ...        ...       ...   
+26998  ILOT AVENUE DE L'EUROPE ZAC DES 95400 VILLIERS...  49.000865  2.399572   
+26999           AVENUE DE L'EUROPE 95400 VILLIERS-LE-BEL  49.000865  2.399572   
+27000     16-18 AVENUE DE L'EUROPE 95400 VILLIERS-LE-BEL  49.000469  2.399441   
+27001      13 A AVENUE DE L'EUROPE 95400 VILLIERS-LE-BEL  49.000865  2.399572   
+27002  29-31 AVENUE DES ENTREPRENEURS 95400 VILLIERS-...  48.999271  2.392369   
+
+       score_BAN                                     adresse_BAN code_com_BAN  
+0       0.957147     Rue Georges Brassens 02840 Athies-sous-Laon        02028  
+1       0.782322     Rue Georges Brassens 02840 Athies-sous-Laon        02028  
+2       0.531783                                  Barenton-Bugny        02046  
+3       0.939154             Rue James Watt 02000 Barenton-Bugny        02046  
+4       0.939154         730 Rue James Watt 02000 Barenton-Bugny        02046  
+...          ...                                             ...          ...  
+26998   0.735876        Avenue de l’Europe 95400 Villiers-le-Bel        95680  
+26999   0.963149        Avenue de l’Europe 95400 Villiers-le-Bel        95680  
+27000   0.902543     18 Avenue de l’Europe 95400 Villiers-le-Bel        95680  
+27001   0.859843        Avenue de l’Europe 95400 Villiers-le-Bel        95680  
+27002   0.858140  Avenue des Entrepreneurs 95400 Villiers-le-Bel        95680  
+
+[27003 rows x 38 columns]
+Fin de la requête
+215/27003 adresses ne sont pas localisées.
+Lancement de la requête BAN
+df_ban
+                                               adresse    lat_BAN   lon_BAN  \
+15                  LE QUINTIN 0&lt;NA&gt; SALON DE PROVENCE  43.630942  5.089737   
+61       ROUTE DE LACANAU 33160 SAINT MEDARD EN JALLES  44.906610 -0.745204   
+88   RUE DES SAULES - ZI DE LA POUANCE 49420 OMBREE...  47.748877 -1.170894   
+147                 SAINT JAUME DEL CREST 0&lt;NA&gt; CLAIRA  42.770944  2.916671   
+203     AUX VOUAUX RUE DE LA FILATURE 88204 REMIREMONT  48.011509  6.604651   
+..                                                 ...        ...       ...   
+209  9-15 RUE HENRI AUGUSTE DES 0&lt;NA&gt; CORBEIL ESSONNES        NaN       NaN   
+210   26 RUE HENRI-AUGUSTE-DESB 0&lt;NA&gt; CORBEIL ESSONNES        NaN       NaN   
+211                   1 ROND-POINT L'ESPACE 91007 EVRY        NaN       NaN   
+213        RUE HENRI FABRE -PRES D'ANTONY 0&lt;NA&gt; ANTONY        NaN       NaN   
+214  ""LES BRUYERES"" RUE DU PAVE 93290 TREMBLAY-EN...        NaN       NaN   
+
+     score_BAN                                        adresse_BAN  \
+15    0.818853                 le Quintin 13300 Salon-de-Provence   
+61    0.814645  Route de Lacanau -  RD 1215 33160 Saint-Médard...   
+88    0.792277      Rue des Saules (Pouancé) 49420 Ombrée d'Anjou   
+147   0.727238                  Sant Jaume Del Crest 66530 Claira   
+203   0.668138                Rue de la Filature 88200 Remiremont   
+..         ...                                                ...   
+209        NaN                                                NaN   
+210        NaN                                                NaN   
+211        NaN                                                NaN   
+213        NaN                                                NaN   
+214        NaN                                                NaN   
+
+     code_com_BAN  
+15        13103.0  
+61        33449.0  
+88        49248.0  
+147       66050.0  
+203       88383.0  
+..            ...  
+209           NaN  
+210           NaN  
+211           NaN  
+213           NaN  
+214           NaN  
+
+[204 rows x 6 columns]
+df_loc
+     DEP_CODE REG_CODE   COMM DATE_REELLE_AUTORISATION DATE_REELLE_DOC  \
+0           3       83   3236               21/07/2021      01/09/2021   
+1           3       83   3262               22/05/2018      08/12/2018   
+2           4       93   4035               15/01/2016             NaN   
+3           8       21   8362               24/06/2025             NaN   
+4           9       73   9225               24/02/2020      14/04/2020   
+..        ...      ...    ...                      ...             ...   
+210        91       11  91174               10/04/2020      02/05/2021   
+211        91       11  91235               20/04/2017      10/11/2017   
+212        91       11  91534               02/10/2019      15/10/2019   
+213        92       11  92002               10/09/2020      24/09/2020   
+214        93       11  93073               05/03/2019      30/04/2021   
+
+    DATE_REELLE_DAACT NATURE_PROJET_DECLAREE I_EXTENSION  \
+0          30/09/2022                      2        True   
+1          24/07/2019                      1       False   
+2                 NaN                      1       False   
+3                 NaN                      2        True   
+4                 NaN                      2        True   
+..                ...                    ...         ...   
+210               NaN                      1       False   
+211               NaN                      2       False   
+212               NaN                      1       False   
+213               NaN                      1       False   
+214        25/01/2022                      1       False   
+
+    DESTINATION_PRINCIPALE ADR_NUM_TER  ... SURF_IND_ISSUE_TRANSFO  \
+0                        6         NaN  ...                      0   
+1                        4         NaN  ...                      0   
+2                        4        5079  ...                      0   
+3                        8         NaN  ...                      0   
+4                        6           1  ...                      0   
+..                     ...         ...  ...                    ...   
+210                      6         NaN  ...                      0   
+211                      8           1  ...                      0   
+212                      4         NaN  ...                      0   
+213                      8         NaN  ...                      0   
+214                      8         NaN  ...                      0   
+
+    SURF_IND_DEMOLIE SURF_IND_TRANSFORMEE ANNEE_REELLE_AUTORISATION  \
+0                257                    0                      2021   
+1                  0                    0                      2018   
+2                  0                    0                      2016   
+3                  0                    0                      2025   
+4                  0                    0                      2020   
+..               ...                  ...                       ...   
+210                0                    0                      2020   
+211                0                    0                      2017   
+212                0                    0                      2019   
+213                0                    0                      2020   
+214                0                    0                      2019   
+
+                                               adresse    lat_BAN   lon_BAN  \
+0          ZI DU COQUET 03260 SAINT-GERMAIN-DES-FOSSES        NaN       NaN   
+1         ""LE RIF"" ROUTE DE PARIS 03410 SAINT-VICTOR        NaN       NaN   
+2                         5079 LE COUVENT 00000 BRUNET        NaN       NaN   
+3         RUE HENRI BAUCHET - ZI DE 08303 RETHEL CEDEX        NaN       NaN   
+4         1 RUE DE L'HERS - ZA GABRIELAT 09100 PAMIERS        NaN       NaN   
+..                                                 ...        ...       ...   
+210   26 RUE HENRI-AUGUSTE-DESB 0&lt;NA&gt; CORBEIL ESSONNES        NaN       NaN   
+211                   1 ROND-POINT L'ESPACE 91007 EVRY        NaN       NaN   
+212                      CEA PARIS-SACLAY 0&lt;NA&gt; SACLAY  48.732589  2.174517   
+213        RUE HENRI FABRE -PRES D'ANTONY 0&lt;NA&gt; ANTONY        NaN       NaN   
+214  ""LES BRUYERES"" RUE DU PAVE 93290 TREMBLAY-EN...        NaN       NaN   
+
+     score_BAN                adresse_BAN code_com_BAN  
+0          NaN                        NaN          NaN  
+1          NaN                        NaN          NaN  
+2          NaN                        NaN          NaN  
+3          NaN                        NaN          NaN  
+4          NaN                        NaN          NaN  
+..         ...                        ...          ...  
+210        NaN                        NaN          NaN  
+211        NaN                        NaN          NaN  
+212   0.380797  Rue de Paris 91400 Saclay      91534.0  
+213        NaN                        NaN          NaN  
+214        NaN                        NaN          NaN  
+
+[215 rows x 38 columns]
+Fin de la requête
+196/215 adresses ne sont pas localisées après une 2e requête.
+Exemples :
+  adresse_BAN                                        adresse
+0         NaN    ZI DU COQUET 03260 SAINT-GERMAIN-DES-FOSSES
+1         NaN   ""LE RIF"" ROUTE DE PARIS 03410 SAINT-VICTOR
+2         NaN                   5079 LE COUVENT 00000 BRUNET
+3         NaN   RUE HENRI BAUCHET - ZI DE 08303 RETHEL CEDEX
+4         NaN   1 RUE DE L'HERS - ZA GABRIELAT 09100 PAMIERS
+5         NaN      ZA PIECE DE L'ORME 10400 NOGENT-SUR-SEINE
+6         NaN      705 RUE ALEXANDRE VOLTA 0&lt;NA&gt; CARCASSONNE
+7         NaN                   SAINT JEAN 0&lt;NA&gt; CARCASSONNE
+8         NaN        ZI LA BARBIERE 47300 VILLENEUVE SUR LOT
+9         NaN  780 AVENUE D OCCITANIE 0&lt;NA&gt; PORT LA NOUVELLE
+Lancement de la requête BAN
+df_ban
+                                               adresse    lat_BAN   lon_BAN  \
+172                              8 AVENUE DU VAL LIMAY  48.990417  1.762306   
+171                          31 RUE DE SEINE GUERVILLE  48.965014  1.731909   
+156                    8 RUE DES BICHES VILLE LA GRAND  46.204024  6.269511   
+157                   1 RUE CHANTEMERLE VILLE LA GRAND  46.202537  6.269928   
+88                   1 LA GARE 50300 LE VAL-SAINT-PERE  48.643133 -1.353653   
+..                                                 ...        ...       ...   
+186  9007 RUE PIERRE MENDES FRANCE 88107 SAINT-DIAÃ...        NaN       NaN   
+188              AUTOR A6 SENS LYON-PARIS 89420 SCEAUX        NaN       NaN   
+189           SITE INDUSTRIEL GENERAL EL 90000 BELFORT        NaN       NaN   
+190                                  ZA 90150 FONTAINE        NaN       NaN   
+193                   1 ROND-POINT L'ESPACE 91007 EVRY        NaN       NaN   
+
+     score_BAN                             adresse_BAN  code_com_BAN  
+172   0.957374             8 Avenue du Val 78520 Limay       78335.0  
+171   0.957226         31 Rue de Seine 78930 Guerville       78291.0  
+156   0.956049   8 Rue des biches 74100 Ville-la-Grand       74305.0  
+157   0.955035  1 Rue chantemerle 74100 Ville-la-Grand       74305.0  
+88    0.952293       1 La Gare 50300 Le Val-Saint-Père       50616.0  
+..         ...                                     ...           ...  
+186        NaN                                     NaN           NaN  
+188        NaN                                     NaN           NaN  
+189        NaN                                     NaN           NaN  
+190        NaN                                     NaN           NaN  
+193        NaN                                     NaN           NaN  
+
+[185 rows x 6 columns]
+df_loc
+     DEP_CODE REG_CODE   COMM DATE_REELLE_AUTORISATION DATE_REELLE_DOC  \
+0           3       83   3236               21/07/2021      01/09/2021   
+1           3       83   3262               22/05/2018      08/12/2018   
+2           4       93   4035               15/01/2016             NaN   
+3           8       21   8362               24/06/2025             NaN   
+4           9       73   9225               24/02/2020      14/04/2020   
+..        ...      ...    ...                      ...             ...   
+191        91       11  91174               17/10/2018             NaN   
+192        91       11  91174               10/04/2020      02/05/2021   
+193        91       11  91235               20/04/2017      10/11/2017   
+194        92       11  92002               10/09/2020      24/09/2020   
+195        93       11  93073               05/03/2019      30/04/2021   
+
+    DATE_REELLE_DAACT NATURE_PROJET_DECLAREE I_EXTENSION  \
+0          30/09/2022                      2        True   
+1          24/07/2019                      1       False   
+2                 NaN                      1       False   
+3                 NaN                      2        True   
+4                 NaN                      2        True   
+..                ...                    ...         ...   
+191               NaN                      1       False   
+192               NaN                      1       False   
+193               NaN                      2       False   
+194               NaN                      1       False   
+195        25/01/2022                      1       False   
+
+    DESTINATION_PRINCIPALE ADR_NUM_TER  ... SURF_IND_ISSUE_TRANSFO  \
+0                        6         NaN  ...                      0   
+1                        4         NaN  ...                      0   
+2                        4        5079  ...                      0   
+3                        8         NaN  ...                      0   
+4                        6           1  ...                      0   
+..                     ...         ...  ...                    ...   
+191                      6         NaN  ...                      0   
+192                      6         NaN  ...                      0   
+193                      8           1  ...                      0   
+194                      8         NaN  ...                      0   
+195                      8         NaN  ...                      0   
+
+    SURF_IND_DEMOLIE SURF_IND_TRANSFORMEE ANNEE_REELLE_AUTORISATION  \
+0                257                    0                      2021   
+1                  0                    0                      2018   
+2                  0                    0                      2016   
+3                  0                    0                      2025   
+4                  0                    0                      2020   
+..               ...                  ...                       ...   
+191                0                    0                      2018   
+192                0                    0                      2020   
+193                0                    0                      2017   
+194                0                    0                      2020   
+195                0                    0                      2019   
+
+                                               adresse    lat_BAN   lon_BAN  \
+0                COQUET 03260 SAINT-GERMAIN-DES-FOSSES  46.212661  3.439965   
+1                            LE RIF 03410 SAINT-VICTOR  46.390642  2.609951   
+2                         5079 LE COUVENT 00000 BRUNET        NaN       NaN   
+3                     RUE HENRI BAUCHET - 08303 RETHEL  49.518452  4.382780   
+4            1 RUE DE L'HERS - GABRIELAT 09100 PAMIERS  43.153411  1.605014   
+..                                                 ...        ...       ...   
+191        9-15 RUE HENRI AUGUSTE DES CORBEIL ESSONNES  48.616942  2.452969   
+192         26 RUE HENRI-AUGUSTE-DESB CORBEIL ESSONNES  48.617856  2.452031   
+193                   1 ROND-POINT L'ESPACE 91007 EVRY        NaN       NaN   
+194              RUE HENRI FABRE -PRES D'ANTONY ANTONY  48.733120  2.308672   
+195  LES BRUYERES RUE DU PAVE 93290 TREMBLAY-EN-FRANCE  48.987062  2.543053   
+
+     score_BAN                                     adresse_BAN code_com_BAN  
+0     0.802176    Rue du Coquet 03260 Saint-Germain-des-Fossés       3236.0  
+1     0.673676                                    Saint-Victor       3262.0  
+2          NaN                                             NaN          NaN  
+3     0.839624                  Rue Henri Bauchet 08300 Rethel       8362.0  
+4     0.712159                   1 Rue de L'hers 09100 Pamiers       9225.0  
+..         ...                                             ...          ...  
+191   0.654739  15 Rue Henri Desbruères 91100 Corbeil-Essonnes      91174.0  
+192   0.667108  26 Rue Henri Desbruères 91100 Corbeil-Essonnes      91174.0  
+193        NaN                                             NaN          NaN  
+194   0.453877                 Rue Henri Poincaré 92160 Antony      92002.0  
+195   0.713160            Rue du Pave 93290 Tremblay-en-France      93073.0  
+
+[196 rows x 38 columns]
+Fin de la requête
+81/196 adresses ne sont pas localisées après une 3e requête.
+Exemples :
+   adresse_BAN                                         adresse
+2          NaN                    5079 LE COUVENT 00000 BRUNET
+11         NaN  A7 SENS LYON - MARSEILLE 13680 LANCON-PROVENCE
+12         NaN  A7 SENS MARSEILLE - LYON 13680 LANCON-PROVENCE
+13         NaN                  ECOPOLIS LAVERA 2 13500 LAVERA
+15         NaN        RD 9 - LE CELLIER - AAÃÂROPO VITROLLES
+20         NaN                          HAUT DU ZA 14360 CAGNY
+21         NaN          LA DELLE DU CLOS NEUF 00000 DEMOUVILLE
+22         NaN                 AUTOROUTE A 13 00000 GIBERVILLE
+23         NaN                     FOSSE SAINT ANDRE 00000 IFS
+24         NaN                     FOSSE SAINT ANDRE 00000 IFS
+Supression de 81/27003 PC non localisés
+Temps d'exécution : 132.04 secondes</code></pre>
+</div>
+</div>
+<section id="traitement-bdtopo" class="level1">
+<h1>Traitement BDTopo</h1>
+<div id="d7ffd6ca" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> importlib</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> credentials</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> BDTopo_fonctions</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>importlib.<span class="bu">reload</span>(credentials)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>importlib.<span class="bu">reload</span>(BDTopo_fonctions)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> credentials <span class="im">import</span> s3</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> BDTopo_fonctions <span class="im">import</span> load_gpkg</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> BDTopo_fonctions <span class="im">import</span> download_to_SSPCloud</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> BDTopo_fonctions <span class="im">import</span> upload_to_onyxia</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>gdf<span class="op">=</span>load_gpkg(<span class="st">"BDTOPO/BDTOPO_BATI_merge_dep_all_1000m3.gpkg"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Téléchargement depuis mgarbe/BDTOPO/BDTOPO_BATI_merge_dep_all_1000m3.gpkg ...
+Chargement réussi (4120762 lignes)</code></pre>
+</div>
+</div>
+<div id="362800a6" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#meilleure estimmation de l'apparition du bati</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>gdf[<span class="st">"DATE_CREAT"</span>] <span class="op">=</span> pd.to_datetime(gdf[<span class="st">"DATE_CREAT"</span>], errors<span class="op">=</span><span class="st">"coerce"</span>).dt.year.astype(<span class="st">'Int64'</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>gdf[<span class="st">"Apparition_BDTopo"</span>] <span class="op">=</span> gdf[[<span class="st">"Annee"</span>, <span class="st">"DATE_CREAT"</span>]].<span class="bu">min</span>(axis<span class="op">=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="initialisation-des-temp-pour-appariement" class="level1">
+<h1>Initialisation des temp pour appariement</h1>
+<div id="87bb4b45" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> concurrent.futures <span class="im">import</span> ProcessPoolExecutor</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> multiprocessing <span class="im">import</span> Manager</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> appariement_Sitadel_BDTopo_fonctions <span class="im">import</span> run_batch</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#batchs</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>deps <span class="op">=</span> <span class="bu">sorted</span>(gdf[<span class="st">"Dep"</span>].unique())</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>batches <span class="op">=</span> [deps[i:i<span class="op">+</span>batch_size] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(deps), batch_size)]</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#traitement</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>total_deps <span class="op">=</span> <span class="bu">len</span>(deps)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>deps_traites <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#queue partagée pour affichage en temp réel</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>manager <span class="op">=</span> Manager()</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>queue <span class="op">=</span> manager.Queue()</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> ProcessPoolExecutor() <span class="im">as</span> exe:</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    futures <span class="op">=</span> [exe.submit(run_batch, gdf, batch, batch_num<span class="op">+</span><span class="dv">1</span>, queue)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>               <span class="cf">for</span> batch_num, batch <span class="kw">in</span> <span class="bu">enumerate</span>(batches)]</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Lecture de la queue en temps réel</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="bu">any</span>(f.done() <span class="kw">is</span> <span class="va">False</span> <span class="cf">for</span> f <span class="kw">in</span> futures) <span class="kw">or</span> <span class="kw">not</span> queue.empty():</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="kw">not</span> queue.empty():</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>            deps_traites <span class="op">+=</span> queue.get()</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\r</span><span class="sc">{</span>deps_traites<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>total_deps<span class="sc">}</span><span class="ss"> départements traités"</span>, end<span class="op">=</span><span class="st">""</span>, flush<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Récupération des résultats finaux</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> fut <span class="kw">in</span> futures:</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        results.append(fut.result())</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Traitement terminé !"</span>)</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co">#fusion</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>temp_BDTopo <span class="op">=</span> pd.concat(results, ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>94/94 départements traités
+Traitement terminé !</code></pre>
+</div>
+</div>
+<div id="7f1ad806" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>seuil_dep<span class="op">=</span><span class="dv">96</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="c277696e" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#from appariement_Sitadel_BDTopo_fonctions import nouveaux_batiments</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#temp_BDTopo=nouveaux_batiments(gdf[gdf["Dep"]&lt;seuil_dep])</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Créer la colonne Apparition_BDTopo : max entre Annee et DATE_CREAT, en ignorant les NaN</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#temp_BDTopo["DATE_CREAT"] = pd.to_datetime(temp_BDTopo["DATE_CREAT"], errors="coerce").dt.year</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#temp_BDTopo["Apparition_BDTopo"] = pd.concat([temp_BDTopo["Annee"], annee_date_creat], axis=1).max(axis=1)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="dc5989be" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#geoloc des batîments nouveaux</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">#import importlib</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#import Sitadel2_fonctions</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#importlib.reload(Sitadel2_fonctions)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#from Sitadel2_fonctions import reverse_geocode</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#temp_BDTopo=reverse_geocode(temp_BDTopo)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="245236fe" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#temp_sit=df1000[df1000["DEP_CODE"]&lt;seuil_dep]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="f8578e31" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>temp_sit<span class="op">=</span>df1000.copy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="8aa65889" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">'SURF_CREEE'</span>] <span class="op">=</span> temp_sit[[<span class="st">'SURF_IND_CREEE'</span>, <span class="st">'SURF_ENT_CREEE'</span>, <span class="st">'SURF_COM_CREEE'</span>]].<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>temp_sit <span class="op">=</span> temp_sit[[</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ANNEE_REELLE_AUTORISATION"</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"DEP_CODE"</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"COMM"</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"DATE_REELLE_AUTORISATION"</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"DATE_REELLE_DOC"</span>,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"DATE_REELLE_DAACT"</span>,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SURF_CREEE"</span>,</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"I_EXTENSION"</span>,</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"DESTINATION_PRINCIPALE"</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"adresse"</span>,</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"adresse_BAN"</span>,</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lat_BAN"</span>,</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lon_BAN"</span>,</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"code_com_BAN"</span>,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"score_BAN"</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="identification-des-pc-localisables" class="level1">
+<h1>Identification des PC localisables</h1>
+<section id="appariement-sitadel2---bdtopo-dans-un-objectif-daffiner-la-localisation-de-sitadel" class="level3">
+<h3 class="anchored" data-anchor-id="appariement-sitadel2---bdtopo-dans-un-objectif-daffiner-la-localisation-de-sitadel">Appariement Sitadel2 - BDTOPO dans un objectif d’affiner la localisation de Sitadel</h3>
+<div id="f78a4ed3" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shapely.geometry <span class="im">import</span> Point</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Préparer GeoDataFrames</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>temp_sit <span class="op">=</span> temp_sit.copy()</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">'geometry'</span>] <span class="op">=</span> temp_sit.<span class="bu">apply</span>(<span class="kw">lambda</span> r: Point(r[<span class="st">"lon_BAN"</span>], r[<span class="st">"lat_BAN"</span>]), axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>temp_sit <span class="op">=</span> gpd.GeoDataFrame(temp_sit, geometry<span class="op">=</span><span class="st">"geometry"</span>, crs<span class="op">=</span><span class="st">"EPSG:4326"</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>sit_remaining <span class="op">=</span> temp_sit.index.to_list()  <span class="co"># tous les indices</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>sit_no_candidate <span class="op">=</span> <span class="bu">set</span>()  <span class="co"># indices à ignorer</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>tour <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>temp_BDTopo <span class="op">=</span> temp_BDTopo.copy()</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> temp_BDTopo.crs <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"temp_BDTopo n'a pas de CRS défini"</span>)</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Projection commune en Lambert 93 pour calcul de distances</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>temp_sit <span class="op">=</span> temp_sit.to_crs(epsg<span class="op">=</span><span class="dv">2154</span>)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>temp_BDTopo <span class="op">=</span> temp_BDTopo.to_crs(epsg<span class="op">=</span><span class="dv">2154</span>)</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Colonnes de résultats</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">"match_temp"</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">"best_temp_idx"</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">"lat_BDTOPO"</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">"lon_BDTOPO"</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">"geometry_BDTOPO"</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------</span></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Boucle globale itérative</span></span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------</span></span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>sit_remaining <span class="op">=</span> temp_sit.index.to_list()  <span class="co"># indices non matchés</span></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>tour <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> sit_remaining:</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\r</span><span class="ss">Tour </span><span class="sc">{</span>tour<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">, lignes restantes à matcher : </span><span class="sc">{</span><span class="bu">len</span>(sit_remaining)<span class="sc">}</span><span class="ss">"</span>, end<span class="op">=</span><span class="st">""</span>, flush<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>    matches_this_round <span class="op">=</span> []</span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Étape 1 : calculer tous les matchs possibles ---</span></span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx_sit <span class="kw">in</span> sit_remaining:</span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> idx_sit <span class="kw">in</span> sit_no_candidate:</span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span>  <span class="co"># ignorer ceux sans candidat du tour précédent</span></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>        row <span class="op">=</span> temp_sit.loc[idx_sit]</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>        point <span class="op">=</span> row.geometry</span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a>        code_dep <span class="op">=</span> row.get(<span class="st">"DEP_CODE"</span>, <span class="va">None</span>)</span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a>        surf <span class="op">=</span> row.get(<span class="st">"SURF_CREEE"</span>, <span class="va">None</span>)</span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a>        annee_sit <span class="op">=</span> row[<span class="st">"ANNEE_REELLE_AUTORISATION"</span>]</span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a>        adresse_ban <span class="op">=</span> row.get(<span class="st">"adresse_BAN"</span>, <span class="st">""</span>) <span class="kw">or</span> <span class="st">""</span></span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a>        candidats <span class="op">=</span> temp_BDTopo[temp_BDTopo[<span class="st">"Dep"</span>] <span class="op">==</span> code_dep]</span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a>        candidats <span class="op">=</span> candidats[candidats[<span class="st">"Apparition_BDTopo"</span>] <span class="op">&gt;=</span> annee_sit]</span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> candidats.empty:</span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a>            sit_no_candidate.add(idx_sit)  <span class="co"># pas de candidat possible, ne plus tester</span></span>
+<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb17-62"><a href="#cb17-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-63"><a href="#cb17-63" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Rayon selon adresse</span></span>
+<span id="cb17-64"><a href="#cb17-64" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> re.match(<span class="vs">r"</span><span class="dv">^\s</span><span class="op">*</span><span class="dv">\d</span><span class="op">+</span><span class="vs">"</span>, adresse_ban):</span>
+<span id="cb17-65"><a href="#cb17-65" aria-hidden="true" tabindex="-1"></a>            rayons <span class="op">=</span> [<span class="dv">100</span>,<span class="dv">200</span>,<span class="dv">300</span>]</span>
+<span id="cb17-66"><a href="#cb17-66" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb17-67"><a href="#cb17-67" aria-hidden="true" tabindex="-1"></a>            rayons <span class="op">=</span> [<span class="dv">500</span>, <span class="dv">1000</span>, <span class="dv">1500</span>, <span class="dv">2000</span>, <span class="dv">2500</span>, <span class="dv">3000</span>, <span class="dv">3500</span>]</span>
+<span id="cb17-68"><a href="#cb17-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-69"><a href="#cb17-69" aria-hidden="true" tabindex="-1"></a>        best_idx <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb17-70"><a href="#cb17-70" aria-hidden="true" tabindex="-1"></a>        best_dist <span class="op">=</span> np.inf</span>
+<span id="cb17-71"><a href="#cb17-71" aria-hidden="true" tabindex="-1"></a>        best_rayon <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb17-72"><a href="#cb17-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-73"><a href="#cb17-73" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> rayon <span class="kw">in</span> rayons:</span>
+<span id="cb17-74"><a href="#cb17-74" aria-hidden="true" tabindex="-1"></a>            <span class="bu">buffer</span> <span class="op">=</span> point.<span class="bu">buffer</span>(rayon)</span>
+<span id="cb17-75"><a href="#cb17-75" aria-hidden="true" tabindex="-1"></a>            candidats_buf <span class="op">=</span> candidats[candidats.geometry.intersects(<span class="bu">buffer</span>)]</span>
+<span id="cb17-76"><a href="#cb17-76" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> candidats_buf.empty:</span>
+<span id="cb17-77"><a href="#cb17-77" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb17-78"><a href="#cb17-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-79"><a href="#cb17-79" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Filtre sur surface ±50%</span></span>
+<span id="cb17-80"><a href="#cb17-80" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> surf <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb17-81"><a href="#cb17-81" aria-hidden="true" tabindex="-1"></a>                candidats_buf <span class="op">=</span> candidats_buf.copy()</span>
+<span id="cb17-82"><a href="#cb17-82" aria-hidden="true" tabindex="-1"></a>                candidats_buf[<span class="st">"aire"</span>] <span class="op">=</span> candidats_buf.geometry.area</span>
+<span id="cb17-83"><a href="#cb17-83" aria-hidden="true" tabindex="-1"></a>                candidats_buf <span class="op">=</span> candidats_buf[</span>
+<span id="cb17-84"><a href="#cb17-84" aria-hidden="true" tabindex="-1"></a>                    (candidats_buf[<span class="st">"aire"</span>] <span class="op">&gt;=</span> <span class="fl">0.7</span> <span class="op">*</span> surf) <span class="op">&amp;</span></span>
+<span id="cb17-85"><a href="#cb17-85" aria-hidden="true" tabindex="-1"></a>                    (candidats_buf[<span class="st">"aire"</span>] <span class="op">&lt;=</span> <span class="fl">1.3</span> <span class="op">*</span> surf)</span>
+<span id="cb17-86"><a href="#cb17-86" aria-hidden="true" tabindex="-1"></a>                ]</span>
+<span id="cb17-87"><a href="#cb17-87" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> candidats_buf.empty:</span>
+<span id="cb17-88"><a href="#cb17-88" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">continue</span></span>
+<span id="cb17-89"><a href="#cb17-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-90"><a href="#cb17-90" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Filtre sur année la plus proche</span></span>
+<span id="cb17-91"><a href="#cb17-91" aria-hidden="true" tabindex="-1"></a>            candidats_buf <span class="op">=</span> candidats_buf.copy()</span>
+<span id="cb17-92"><a href="#cb17-92" aria-hidden="true" tabindex="-1"></a>            candidats_buf[<span class="st">"diff_annee"</span>] <span class="op">=</span> <span class="bu">abs</span>(candidats_buf[<span class="st">"Annee"</span>] <span class="op">-</span> annee_sit)</span>
+<span id="cb17-93"><a href="#cb17-93" aria-hidden="true" tabindex="-1"></a>            min_diff <span class="op">=</span> candidats_buf[<span class="st">"diff_annee"</span>].<span class="bu">min</span>()</span>
+<span id="cb17-94"><a href="#cb17-94" aria-hidden="true" tabindex="-1"></a>            candidats_buf <span class="op">=</span> candidats_buf[candidats_buf[<span class="st">"diff_annee"</span>] <span class="op">==</span> min_diff]</span>
+<span id="cb17-95"><a href="#cb17-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-96"><a href="#cb17-96" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Sélection du plus proche (distance)</span></span>
+<span id="cb17-97"><a href="#cb17-97" aria-hidden="true" tabindex="-1"></a>            distances <span class="op">=</span> candidats_buf.geometry.distance(point)</span>
+<span id="cb17-98"><a href="#cb17-98" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> distances.empty:</span>
+<span id="cb17-99"><a href="#cb17-99" aria-hidden="true" tabindex="-1"></a>                candidate_idx <span class="op">=</span> distances.idxmin()</span>
+<span id="cb17-100"><a href="#cb17-100" aria-hidden="true" tabindex="-1"></a>                candidate_dist <span class="op">=</span> distances[candidate_idx]</span>
+<span id="cb17-101"><a href="#cb17-101" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> candidate_dist <span class="op">&lt;</span> best_dist:</span>
+<span id="cb17-102"><a href="#cb17-102" aria-hidden="true" tabindex="-1"></a>                    best_dist <span class="op">=</span> candidate_dist</span>
+<span id="cb17-103"><a href="#cb17-103" aria-hidden="true" tabindex="-1"></a>                    best_idx <span class="op">=</span> candidate_idx</span>
+<span id="cb17-104"><a href="#cb17-104" aria-hidden="true" tabindex="-1"></a>                    best_rayon <span class="op">=</span> rayon</span>
+<span id="cb17-105"><a href="#cb17-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-106"><a href="#cb17-106" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> best_idx <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb17-107"><a href="#cb17-107" aria-hidden="true" tabindex="-1"></a>            matches_this_round.append({</span>
+<span id="cb17-108"><a href="#cb17-108" aria-hidden="true" tabindex="-1"></a>                <span class="st">"sit_idx"</span>: idx_sit,</span>
+<span id="cb17-109"><a href="#cb17-109" aria-hidden="true" tabindex="-1"></a>                <span class="st">"temp_idx"</span>: best_idx,</span>
+<span id="cb17-110"><a href="#cb17-110" aria-hidden="true" tabindex="-1"></a>                <span class="st">"rayon"</span>: best_rayon,</span>
+<span id="cb17-111"><a href="#cb17-111" aria-hidden="true" tabindex="-1"></a>                <span class="st">"dist"</span>: best_dist</span>
+<span id="cb17-112"><a href="#cb17-112" aria-hidden="true" tabindex="-1"></a>            })</span>
+<span id="cb17-113"><a href="#cb17-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-114"><a href="#cb17-114" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> matches_this_round:</span>
+<span id="cb17-115"><a href="#cb17-115" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span>  <span class="co"># plus de matchs possibles</span></span>
+<span id="cb17-116"><a href="#cb17-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-117"><a href="#cb17-117" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Étape 2 : résoudre les doublons sur temp_idx ---</span></span>
+<span id="cb17-118"><a href="#cb17-118" aria-hidden="true" tabindex="-1"></a>    df_matches <span class="op">=</span> pd.DataFrame(matches_this_round)</span>
+<span id="cb17-119"><a href="#cb17-119" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> df_matches.empty:</span>
+<span id="cb17-120"><a href="#cb17-120" aria-hidden="true" tabindex="-1"></a>        duplicates_temp <span class="op">=</span> df_matches[df_matches.duplicated(subset<span class="op">=</span>[<span class="st">"temp_idx"</span>], keep<span class="op">=</span><span class="va">False</span>)]</span>
+<span id="cb17-121"><a href="#cb17-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-122"><a href="#cb17-122" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> temp_idx <span class="kw">in</span> duplicates_temp[<span class="st">"temp_idx"</span>].unique():</span>
+<span id="cb17-123"><a href="#cb17-123" aria-hidden="true" tabindex="-1"></a>            subset <span class="op">=</span> df_matches[df_matches[<span class="st">"temp_idx"</span>] <span class="op">==</span> temp_idx]</span>
+<span id="cb17-124"><a href="#cb17-124" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> subset.empty <span class="kw">or</span> subset[<span class="st">"dist"</span>].dropna().empty:</span>
+<span id="cb17-125"><a href="#cb17-125" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb17-126"><a href="#cb17-126" aria-hidden="true" tabindex="-1"></a>            best_row <span class="op">=</span> subset.loc[subset[<span class="st">"dist"</span>].idxmin()]</span>
+<span id="cb17-127"><a href="#cb17-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-128"><a href="#cb17-128" aria-hidden="true" tabindex="-1"></a>            <span class="co"># réinitialiser les autres sit_idx</span></span>
+<span id="cb17-129"><a href="#cb17-129" aria-hidden="true" tabindex="-1"></a>            other_sits <span class="op">=</span> subset[<span class="st">"sit_idx"</span>].tolist()</span>
+<span id="cb17-130"><a href="#cb17-130" aria-hidden="true" tabindex="-1"></a>            other_sits.remove(best_row[<span class="st">"sit_idx"</span>])</span>
+<span id="cb17-131"><a href="#cb17-131" aria-hidden="true" tabindex="-1"></a>            temp_sit.loc[other_sits, [<span class="st">"match_temp"</span>, <span class="st">"best_temp_idx"</span>, <span class="st">"lat_BDTOPO"</span>, <span class="st">"lon_BDTOPO"</span>, <span class="st">"geometry_BDTOPO"</span>]] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb17-132"><a href="#cb17-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-133"><a href="#cb17-133" aria-hidden="true" tabindex="-1"></a>            <span class="co"># ne garder que le meilleur</span></span>
+<span id="cb17-134"><a href="#cb17-134" aria-hidden="true" tabindex="-1"></a>            df_matches <span class="op">=</span> df_matches.drop(subset.index.difference([best_row.name]))</span>
+<span id="cb17-135"><a href="#cb17-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-136"><a href="#cb17-136" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Étape 3 : enregistrer les matchs validés ---</span></span>
+<span id="cb17-137"><a href="#cb17-137" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _, m <span class="kw">in</span> df_matches.iterrows():</span>
+<span id="cb17-138"><a href="#cb17-138" aria-hidden="true" tabindex="-1"></a>        idx_sit <span class="op">=</span> m[<span class="st">"sit_idx"</span>]</span>
+<span id="cb17-139"><a href="#cb17-139" aria-hidden="true" tabindex="-1"></a>        best_idx <span class="op">=</span> m[<span class="st">"temp_idx"</span>]</span>
+<span id="cb17-140"><a href="#cb17-140" aria-hidden="true" tabindex="-1"></a>        rayon <span class="op">=</span> m[<span class="st">"rayon"</span>]</span>
+<span id="cb17-141"><a href="#cb17-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-142"><a href="#cb17-142" aria-hidden="true" tabindex="-1"></a>        temp_sit.at[idx_sit, <span class="st">"match_temp"</span>] <span class="op">=</span> rayon</span>
+<span id="cb17-143"><a href="#cb17-143" aria-hidden="true" tabindex="-1"></a>        temp_sit.at[idx_sit, <span class="st">"best_temp_idx"</span>] <span class="op">=</span> best_idx</span>
+<span id="cb17-144"><a href="#cb17-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-145"><a href="#cb17-145" aria-hidden="true" tabindex="-1"></a>        geom_temp <span class="op">=</span> temp_BDTopo.loc[best_idx, <span class="st">"geometry"</span>]</span>
+<span id="cb17-146"><a href="#cb17-146" aria-hidden="true" tabindex="-1"></a>        temp_sit.at[idx_sit, <span class="st">"geometry_BDTOPO"</span>] <span class="op">=</span> geom_temp</span>
+<span id="cb17-147"><a href="#cb17-147" aria-hidden="true" tabindex="-1"></a>        temp_sit.at[idx_sit, <span class="st">"Apparition_BDTopo"</span>] <span class="op">=</span> temp_BDTopo.loc[best_idx, <span class="st">"Apparition_BDTopo"</span>]</span>
+<span id="cb17-148"><a href="#cb17-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-149"><a href="#cb17-149" aria-hidden="true" tabindex="-1"></a>        centroid <span class="op">=</span> geom_temp.centroid</span>
+<span id="cb17-150"><a href="#cb17-150" aria-hidden="true" tabindex="-1"></a>        centroid_wgs <span class="op">=</span> gpd.GeoSeries([centroid], crs<span class="op">=</span><span class="st">"EPSG:2154"</span>).to_crs(<span class="st">"EPSG:4326"</span>).iloc[<span class="dv">0</span>]</span>
+<span id="cb17-151"><a href="#cb17-151" aria-hidden="true" tabindex="-1"></a>        temp_sit.at[idx_sit, <span class="st">"lat_BDTOPO"</span>] <span class="op">=</span> centroid_wgs.y</span>
+<span id="cb17-152"><a href="#cb17-152" aria-hidden="true" tabindex="-1"></a>        temp_sit.at[idx_sit, <span class="st">"lon_BDTOPO"</span>] <span class="op">=</span> centroid_wgs.x</span>
+<span id="cb17-153"><a href="#cb17-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-154"><a href="#cb17-154" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Étape 4 : supprimer temp_BDTopo déjà matchés ---</span></span>
+<span id="cb17-155"><a href="#cb17-155" aria-hidden="true" tabindex="-1"></a>    temp_BDTopo <span class="op">=</span> temp_BDTopo.drop(index<span class="op">=</span>df_matches[<span class="st">"temp_idx"</span>].unique())</span>
+<span id="cb17-156"><a href="#cb17-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-157"><a href="#cb17-157" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Étape 5 : mettre à jour sit_remaining ---</span></span>
+<span id="cb17-158"><a href="#cb17-158" aria-hidden="true" tabindex="-1"></a>    sit_remaining <span class="op">=</span> [</span>
+<span id="cb17-159"><a href="#cb17-159" aria-hidden="true" tabindex="-1"></a>        idx <span class="cf">for</span> idx <span class="kw">in</span> sit_remaining</span>
+<span id="cb17-160"><a href="#cb17-160" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> temp_sit.at[idx, <span class="st">"best_temp_idx"</span>] <span class="kw">is</span> <span class="va">None</span> <span class="kw">and</span> idx <span class="kw">not</span> <span class="kw">in</span> sit_no_candidate</span>
+<span id="cb17-161"><a href="#cb17-161" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb17-162"><a href="#cb17-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-163"><a href="#cb17-163" aria-hidden="true" tabindex="-1"></a>    tour <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb17-164"><a href="#cb17-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-165"><a href="#cb17-165" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">"geometry_BDTOPO"</span>] <span class="op">=</span> gpd.GeoSeries(temp_sit[<span class="st">"geometry_BDTOPO"</span>], crs<span class="op">=</span><span class="st">"EPSG:2154"</span>)</span>
+<span id="cb17-166"><a href="#cb17-166" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Matching terminé."</span>)</span>
+<span id="cb17-167"><a href="#cb17-167" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Tour 1, lignes restantes à matcher : 26922Tour 5, lignes restantes à matcher : 17277
+Matching terminé.</code></pre>
+</div>
+</div>
+<div id="8d1e8361" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>sauv_temp_sit<span class="op">=</span>temp_sit.copy()</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>sauv_temp_BDTopo<span class="op">=</span>temp_BDTopo.copy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="définition-des-pc-dits-identifiables-4-possibilités-dont-le-succès-dappariement-avec-bdtopo" class="level3">
+<h3 class="anchored" data-anchor-id="définition-des-pc-dits-identifiables-4-possibilités-dont-le-succès-dappariement-avec-bdtopo">Définition des PC dits “identifiables” : 4 possibilités dont le succès d’appariement avec BDTopo</h3>
+<div id="69513755" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>temp_sit<span class="op">=</span>sauv_temp_sit.copy()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>temp_BDTopo<span class="op">=</span>sauv_temp_BDTopo.copy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cc791d78" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ON SELECTIONNE LES PC LOCALISABLES (pcq Sitadel précis ou pcq appariement BDTOPO) </span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co">#condition 1 : l'adresse Sitadel et BAN ont toutes deux un numéro de voie </span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>condition1<span class="op">=</span>(temp_sit[<span class="st">"adresse_BAN"</span>].astype(<span class="bu">str</span>).<span class="bu">str</span>.match(<span class="vs">r"</span><span class="dv">^\d</span><span class="vs">"</span>)) <span class="op">&amp;</span> (temp_sit[<span class="st">"adresse"</span>].astype(<span class="bu">str</span>).<span class="bu">str</span>.match(<span class="vs">r"</span><span class="dv">^\d</span><span class="vs">"</span>))</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co">#condition 2 : pas 1 &amp; tb score BAN &amp; date d'ouverture du chantier dispo &amp; surface créee supérieure à 3000m2 (on veut éviter d'exclure trop facilement ces surfaces </span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co"># + être précis sur la localisation (ex : num de rue) importe moins puisque la surface est grande)</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>condition2<span class="op">=</span>(<span class="op">~</span>condition1) <span class="op">&amp;</span> (temp_sit[<span class="st">"score_BAN"</span>]<span class="op">&gt;</span><span class="fl">0.9</span>) <span class="op">&amp;</span> (temp_sit[<span class="st">"DATE_REELLE_DOC"</span>].notna()) <span class="op">&amp;</span> (temp_sit[<span class="st">"SURF_CREEE"</span>]<span class="op">&gt;</span><span class="dv">3000</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co">#condition 3 : pas 1 ni 2 &amp; on retrouve une zone dans BAN </span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>condition3<span class="op">=</span>(<span class="op">~</span>condition1) <span class="op">&amp;</span> (<span class="op">~</span>condition2) <span class="op">&amp;</span> (</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        temp_sit[<span class="st">"adresse"</span>].astype(<span class="bu">str</span>).<span class="bu">str</span>.startswith(<span class="st">"Z"</span>) <span class="op">|</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        temp_sit[<span class="st">"adresse"</span>].astype(<span class="bu">str</span>).<span class="bu">str</span>.contains(<span class="st">"parc"</span>, case<span class="op">=</span><span class="va">False</span>, na<span class="op">=</span><span class="va">False</span>)) <span class="op">&amp;</span> (</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>            temp_sit[<span class="st">"adresse_BAN"</span>].astype(<span class="bu">str</span>).<span class="bu">str</span>.startswith(<span class="st">"Z"</span>) <span class="op">|</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>            temp_sit[<span class="st">"adresse_BAN"</span>].astype(<span class="bu">str</span>).<span class="bu">str</span>.contains(<span class="st">"zi"</span>, case<span class="op">=</span><span class="va">False</span>, na<span class="op">=</span><span class="va">False</span>) <span class="op">|</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>            temp_sit[<span class="st">"adresse_BAN"</span>].astype(<span class="bu">str</span>).<span class="bu">str</span>.contains(<span class="st">"za"</span>, case<span class="op">=</span><span class="va">False</span>, na<span class="op">=</span><span class="va">False</span>) <span class="op">|</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>            temp_sit[<span class="st">"adresse_BAN"</span>].astype(<span class="bu">str</span>).<span class="bu">str</span>.contains(<span class="st">"zone"</span>, case<span class="op">=</span><span class="va">False</span>, na<span class="op">=</span><span class="va">False</span>) <span class="op">|</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>            (temp_sit[<span class="st">"adresse_BAN"</span>].astype(<span class="bu">str</span>).<span class="bu">str</span>.contains(<span class="st">"parc"</span>, case<span class="op">=</span><span class="va">False</span>, na<span class="op">=</span><span class="va">False</span>) <span class="op">&amp;</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>         <span class="op">~</span>temp_sit[<span class="st">"adresse_BAN"</span>].astype(<span class="bu">str</span>).<span class="bu">str</span>.contains(<span class="vs">r"</span><span class="dv">\b</span><span class="vs">du parc</span><span class="dv">\b</span><span class="vs">"</span>, case<span class="op">=</span><span class="va">False</span>, na<span class="op">=</span><span class="va">False</span>)) </span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="co">#condition 4 : on a un match avec BDTopo (= on localise a postériori le batîment)</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>condition4<span class="op">=</span>(temp_sit[<span class="st">"match_temp"</span>] <span class="op">&gt;</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="b2c635fb" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>conditions <span class="op">=</span> [condition1, condition2, condition3, condition4]</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>values <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">"ind_localisable"</span>] <span class="op">=</span> np.select(conditions, values, default<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Nombre de bâtiments localisables : </span><span class="sc">{</span>(temp_sit[<span class="st">'ind_localisable'</span>]<span class="op">&gt;</span><span class="dv">0</span>)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Nombre de bâtiments localisables : 10608</code></pre>
+</div>
+</div>
+<div id="acfc64b3" class="cell" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Mise en forme df</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">"B_geometry"</span>] <span class="op">=</span> temp_sit[<span class="st">"geometry_BDTOPO"</span>].where(</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    temp_sit[<span class="st">"geometry_BDTOPO"</span>].notna(),</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    temp_sit[<span class="st">"geometry"</span>]</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>temp_sit <span class="op">=</span> gpd.GeoDataFrame(temp_sit, geometry<span class="op">=</span><span class="st">"B_geometry"</span>, crs<span class="op">=</span>temp_sit.crs)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>temp_sit <span class="op">=</span> temp_sit.rename(columns<span class="op">=</span>{<span class="st">"geometry"</span>: <span class="st">"geometry_Sitadel"</span>})</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>temp_sit <span class="op">=</span> temp_sit.rename(columns<span class="op">=</span>{<span class="st">"match_temp"</span>: <span class="st">"ind_match_BDTOPO"</span>})</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>temp_sit <span class="op">=</span> temp_sit.drop(columns<span class="op">=</span>[<span class="st">"geometry_Sitadel"</span>, <span class="st">"geometry_BDTOPO"</span>])</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co">#temp_sit["geometry_Sitadel"] = temp_sit["geometry_Sitadel"].to_wkt() #pour export</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="co">#temp_sit["geometry_BDTOPO"] = temp_sit["geometry_BDTOPO"].to_wkt() #pour export</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="ab689e47" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Récupérer les années</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>annees <span class="op">=</span> <span class="bu">sorted</span>(temp_sit[<span class="st">'ANNEE_REELLE_AUTORISATION'</span>].dropna().unique())</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculer les proportions</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>prop_localisable <span class="op">=</span> []</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>prop_matched <span class="op">=</span> []</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> annee <span class="kw">in</span> annees:</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    subset <span class="op">=</span> temp_sit[temp_sit[<span class="st">'ANNEE_REELLE_AUTORISATION'</span>] <span class="op">==</span> annee]</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    n_total <span class="op">=</span> <span class="bu">len</span>(subset)</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_total <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>        prop_localisable.append(<span class="dv">0</span>)</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>        prop_matched.append(<span class="dv">0</span>)</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>        n_localisable <span class="op">=</span> (subset[<span class="st">'ind_localisable'</span>] <span class="op">&gt;</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>        n_matched <span class="op">=</span> ((subset[<span class="st">'ind_localisable'</span>] <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (subset[<span class="st">'ind_match_BDTOPO'</span>] <span class="op">&gt;</span> <span class="dv">0</span>)).<span class="bu">sum</span>()</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>        prop_localisable.append(n_localisable <span class="op">/</span> n_total)</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>        prop_matched.append(n_matched <span class="op">/</span> n_total)</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">6</span>))</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>plt.bar(annees, prop_localisable, color<span class="op">=</span><span class="st">'lightgray'</span>, label<span class="op">=</span><span class="st">'Localisable (ind_localisable&gt;0)'</span>)</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>plt.bar(annees, prop_matched, color<span class="op">=</span><span class="st">'skyblue'</span>, label<span class="op">=</span><span class="st">'Match_temp = 1'</span>)</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Année'</span>)</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Proportion'</span>)</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Proportion de temp_sit localisables et match_temp&gt;0 par année'</span>)</span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>plt.ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="appariement_Sitadel_BDTopo_files/figure-html/cell-19-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="f1428f6f" class="cell" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#EXPORT</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> importlib</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os   </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> BDTopo_fonctions</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>importlib.<span class="bu">reload</span>(BDTopo_fonctions)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> BDTopo_fonctions <span class="im">import</span> upload_to_onyxia</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>output_file <span class="op">=</span> <span class="st">"temp_BDTopo_hors_match_Sitadel.gpkg"</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>temp_BDTopo.to_file(output_file, driver<span class="op">=</span><span class="st">"GPKG"</span>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>remote_path <span class="op">=</span> <span class="ss">f"Sitadel/</span><span class="sc">{</span>output_file<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>upload_to_onyxia(output_file, bucket<span class="op">=</span><span class="st">"mgarbe"</span>, remote_path<span class="op">=</span>remote_path)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>os.remove(output_file)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>output_file <span class="op">=</span> <span class="st">"appariement_Sitadel2_BDTopo_fulldep_1000m3.gpkg"</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>temp_sit.to_file(output_file, driver<span class="op">=</span><span class="st">"GPKG"</span>)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>remote_path <span class="op">=</span> <span class="ss">f"Sitadel/</span><span class="sc">{</span>output_file<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>upload_to_onyxia(output_file, bucket<span class="op">=</span><span class="st">"mgarbe"</span>, remote_path<span class="op">=</span>remote_path)</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>os.remove(output_file)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[Upload] Envoi de temp_BDTopo_hors_match_Sitadel.gpkg vers mgarbe/Sitadel/temp_BDTopo_hors_match_Sitadel.gpkg ...
+[Upload] Terminé avec succès
+[Upload] Envoi de appariement_Sitadel2_BDTopo_fulldep_1000m3.gpkg vers mgarbe/Sitadel/appariement_Sitadel2_BDTopo_fulldep_1000m3.gpkg ...
+[Upload] Terminé avec succès</code></pre>
+</div>
+</div>
+</section>
+<section id="création-base-pour-clustering" class="level3">
+<h3 class="anchored" data-anchor-id="création-base-pour-clustering">Création base pour clustering</h3>
+<p>Cette base regroupe tous les bâtiments de BD TOPO identifiés en 2013, tous ceux identifiés entre 2014 et 2025 hors matching avec Sitadel et les PC identifiables de Sitadel.</p>
+<p>Nous créons : * une variable B_geometry qui est le best guest de la geometry du bâti, après croisement Sitadel BDTopo</p>
+<ul>
+<li>une variable Annee_REF qui est l’année du dépôt du PC ou à défaut l’année d’identification du Bâti dans BDTopo</li>
+</ul>
+<p><em>Dans la majorité des cas, les colonnes sont propres à une base.</em></p>
+<div id="9888b437" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> BDTopo_fonctions <span class="im">import</span> load_gpkg</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>temp_BDTopo<span class="op">=</span>load_gpkg(<span class="st">"Sitadel/temp_BDTopo_hors_match_Sitadel.gpkg"</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>temp_sit<span class="op">=</span>load_gpkg(<span class="st">"Sitadel/appariement_Sitadel2_BDTopo_fulldep_1000m3.gpkg"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Téléchargement depuis mgarbe/Sitadel/temp_BDTopo_hors_match_Sitadel.gpkg ...
+Chargement réussi (84587 lignes)
+Téléchargement depuis mgarbe/Sitadel/appariement_Sitadel2_BDTopo_fulldep_1000m3.gpkg ...
+Chargement réussi (26921 lignes)</code></pre>
+</div>
+</div>
+<div id="1fa0a578" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># GESTION DES DOUBLONS INTRODUITS EN 2019 DANS temp_BDTopo</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> importlib</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> appariement_Sitadel_BDTopo_fonctions</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>importlib.<span class="bu">reload</span>(appariement_Sitadel_BDTopo_fonctions)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> appariement_Sitadel_BDTopo_fonctions <span class="im">import</span> fill_dep_BAN, doublons_temp_BDTopo</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="co">#supression des doublons introduits en 2019 avec l'extension des périmètres</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>temp_BDTopo<span class="op">=</span>doublons_temp_BDTopo(temp_BDTopo)</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="co">#identification des départements et suppression des obs non identifiables</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>temp_BDTopo[<span class="st">"Dep"</span>]<span class="op">=</span>temp_BDTopo[<span class="st">"Dep"</span>].astype(<span class="st">"Int64"</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>temp_BDTopo<span class="op">=</span>fill_dep_BAN(temp_BDTopo)</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>temp_BDTopo <span class="op">=</span> temp_BDTopo[temp_BDTopo[<span class="st">"Dep"</span>].notna()].reset_index(drop<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Groupes doublons identifiés : 12605
+Lignes supprimées : 15410
+Complété 10586 valeurs NA de 'Dep'.</code></pre>
+</div>
+</div>
+<p>Appariement</p>
+<div id="b1411fbe" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> appariement_Sitadel_BDTopo_fonctions <span class="im">import</span> parallel_stock_build</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="co">#temp_stock2013=parallel_stock_build(gdf, annee_min=2008, annee_max=2013, rayon=10)</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>temp_stock2013<span class="op">=</span>gdf[gdf[<span class="st">"Annee"</span>]<span class="op">==</span><span class="dv">2013</span>]</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>temp_stock2013[<span class="st">'Annee_REF'</span>] <span class="op">=</span> <span class="dv">2013</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co">#temp_stock2013=doublons_temp_BDTopo(temp_stock2013)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/opt/python/lib/python3.13/site-packages/geopandas/geodataframe.py:1968: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  super().__setitem__(key, value)</code></pre>
+</div>
+</div>
+<div id="a587e771" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Mise en forme</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>temp_stock2013<span class="op">=</span>temp_stock2013.rename(columns<span class="op">=</span>{<span class="st">"Dep"</span>: <span class="st">"DEP_CODE"</span>, <span class="st">"Annee"</span>:<span class="st">"Annee_Millésime"</span>,<span class="st">"aire"</span>:<span class="st">"SURF_CREEE"</span>})</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>temp_BDTopo<span class="op">=</span>temp_BDTopo.rename(columns<span class="op">=</span>{<span class="st">"Dep"</span>: <span class="st">"DEP_CODE"</span>, <span class="st">"Annee"</span>:<span class="st">"Annee_Millésime"</span>,<span class="st">"aire"</span>:<span class="st">"SURF_CREEE"</span>})</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>temp_sit[<span class="st">"Base"</span>]<span class="op">=</span><span class="st">"Sitadel"</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>temp_BDTopo[<span class="st">"Base"</span>]<span class="op">=</span><span class="st">"BDTOPO"</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>temp_stock2013[<span class="st">"Base"</span>]<span class="op">=</span><span class="st">"BDTOPO"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="038d0fce" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>temp_BDTopo_concat <span class="op">=</span> temp_BDTopo[[<span class="st">'Base'</span>,</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'ID'</span>, <span class="st">'DEP_CODE'</span>, <span class="st">'ORIGIN_BAT'</span>, <span class="st">'NATURE'</span>, </span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'USAGE1'</span>, <span class="st">'Apparition_BDTopo'</span>, <span class="st">'SOURCE'</span>, </span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'geometry'</span>, <span class="st">'SURF_CREEE'</span>]].copy()</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>temp_stock2013_concat<span class="op">=</span>temp_stock2013[[<span class="st">'Base'</span>,</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'ID'</span>, <span class="st">'DEP_CODE'</span>, <span class="st">'ORIGIN_BAT'</span>, <span class="st">'NATURE'</span>, </span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'USAGE1'</span>, <span class="st">'SOURCE'</span>, </span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'geometry'</span>, <span class="st">'Annee_REF'</span>]].copy()</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="co">#temp_sit_concat=temp_sit[temp_sit["ind_localisable"]==1].copy()</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>temp_sit_concat<span class="op">=</span>temp_sit.copy()</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>temp_sit_concat<span class="op">=</span>temp_sit_concat[[<span class="st">'Base'</span>,<span class="st">'ANNEE_REELLE_AUTORISATION'</span>,<span class="st">'DEP_CODE'</span>,<span class="st">'COMM'</span>,</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>       <span class="st">'DATE_REELLE_AUTORISATION'</span>, <span class="st">'DATE_REELLE_DOC'</span>, <span class="st">'DATE_REELLE_DAACT'</span>,<span class="st">'SURF_CREEE'</span>,<span class="st">'I_EXTENSION'</span>,<span class="st">'DESTINATION_PRINCIPALE'</span>,<span class="st">'Apparition_BDTopo'</span>,<span class="st">'geometry'</span>,</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>       <span class="st">"ind_localisable"</span>]].copy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="1090ff2c" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>temp_concat<span class="op">=</span>pd.concat([temp_sit_concat, temp_BDTopo_concat,temp_stock2013_concat], ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>temp_concat[<span class="st">"ANNEE_REELLE_AUTORISATION"</span>].astype(<span class="st">"Int64"</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> temp_concat[<span class="st">"Annee_REF"</span>].isna()</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>temp_concat.loc[mask, <span class="st">"Annee_REF"</span>] <span class="op">=</span> temp_concat.loc[mask, <span class="st">"ANNEE_REELLE_AUTORISATION"</span>].fillna(</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    temp_concat.loc[mask, <span class="st">"Apparition_BDTopo"</span>]</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>).astype(<span class="st">"Int64"</span>)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>temp_concat.drop(</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[<span class="st">"ANNEE_REELLE_AUTORISATION"</span>, <span class="st">"Apparition_BDTopo"</span>], </span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    inplace<span class="op">=</span><span class="va">True</span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>temp_concat[<span class="st">"Annee_REF"</span>]<span class="op">=</span>temp_concat[<span class="st">"Annee_REF"</span>].astype(<span class="st">"Int64"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="558f5025" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#EXPORT</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> importlib</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os   </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> BDTopo_fonctions</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>importlib.<span class="bu">reload</span>(BDTopo_fonctions)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> BDTopo_fonctions <span class="im">import</span> upload_to_onyxia</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>output_file <span class="op">=</span> <span class="st">"df_clustering_fulldep_1000m3.gpkg"</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>temp_concat.to_file(output_file, driver<span class="op">=</span><span class="st">"GPKG"</span>)</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>remote_path <span class="op">=</span> <span class="ss">f"Sitadel/</span><span class="sc">{</span>output_file<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>upload_to_onyxia(output_file, bucket<span class="op">=</span><span class="st">"mgarbe"</span>, remote_path<span class="op">=</span>remote_path)</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>os.remove(output_file)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[Upload] Envoi de df_clustering_fulldep_1000m3.gpkg vers mgarbe/Sitadel/df_clustering_fulldep_1000m3.gpkg ...
+[Upload] Terminé avec succès</code></pre>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

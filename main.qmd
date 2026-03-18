@@ -59,10 +59,11 @@ library(rlang)
 ```
 
 
-```{r import_donnees}
+```{r IMPORT DONNEES}
 #| echo: false
 #| output: false
 #| context: setup
+
 setwd("/home/onyxia/work/projet3A")
 # Charger les fonctions
 source("functions/main_functions.R")
@@ -89,6 +90,11 @@ df_vote <- get_s3_csv("mgarbe", remote_path_elec, delim_csv = ",") %>%
 remote_path_cluster="Sitadel/df_POSTclustering_fulldep_1000m3.gpkg"
 df_cluster <- get_s3_gpkg("mgarbe", remote_path_cluster) 
 
+#Télécharger les données match Sitadel/BDTOPO 
+remote_path_match="Sitadel/appariement_Sitadel2_BDTopo_fulldep_1000m3.gpkg"
+df_match_Sitadel_BDTOPO <- get_s3_gpkg("mgarbe", remote_path_match) 
+
+
 ```
 
 ```{r}
@@ -102,63 +108,72 @@ gdf_RDD_seuil <- gdf_RDD %>% filter(abs(delta_score_1) < seuil)
 ```
 
 
+# Statistiques descriptives 
+
+## Distributions Bati (moyenne par commune et mandat)
+
+
+
 ```{r,echo=FALSE,warning=FALSE}
-hist_variable <- function(data, variable,  titre_variable = NULL,bins = 50) {
+dens_plot <- function(data, variable, election_col = "election", titre_variable = NULL, right_pct = 0.97, adjust = 1) {
   
   var_quo <- enquo(variable)
-  var_name <- as_label(var_quo)
-  
-  med <- median(dplyr::pull(data, !!var_quo), na.rm = TRUE)
-  
-  p <- ggplot(data, aes(x = !!var_quo)) +
-    
-    geom_histogram(
-      bins = bins,
-      fill = "#2C7FB8",
-      color = "white",
-      alpha = 0.85
-    ) +
-    
-    geom_vline(
-      xintercept = med,
-      linetype = "dashed",
-      size = 1,
-      color = "#D95F0E"
-    ) +
-    
-    labs(
-      title = paste("Distribution ", titre_variable),
-      subtitle = paste("Médiane :", round(med, 1)),
-      x = var_name,
-      y = "Nombre d'observations"
-    ) +
-    
-    theme_minimal(base_size = 14) +
-    theme(
-      plot.title = element_text(face = "bold", hjust = 0.5)
+  var_name <- if (is.null(titre_variable)) as_label(var_quo) else titre_variable
+  # Préparer la variable "Mandat" à partir de election_col
+  # Filtrer uniquement les valeurs > 0
+  data <- data %>%
+    filter(!!var_quo > 0) %>%
+    mutate(
+      # Préparer la variable "Mandat"
+      Mandat = case_when(
+        !!sym(election_col) == 2014 ~ "2014-2020",
+        !!sym(election_col) == 2020 ~ "2020-2025",
+        TRUE ~ as.character(!!sym(election_col))
+      )
     )
+
+  var_values <- dplyr::pull(data, !!var_quo)
   
-  ggplotly(p) %>%
-    layout(bargap = 0.05)
+  # Calcul médiane globale (optionnel, peut faire par groupe si tu veux)
+  med <- median(var_values, na.rm = TRUE)
+  
+  # Borne supérieure pour zoom à right_pct
+  upper <- quantile(var_values, right_pct, na.rm = TRUE)
+  
+  # Graph ggplot avec densité par Mandat
+  p <- ggplot(data, aes(x = !!var_quo, fill = Mandat)) +
+    geom_density(alpha = 0.5, adjust = adjust) +
+    geom_vline(xintercept = med, linetype = "dashed", size = 1, color = "#000000") +
+    coord_cartesian(xlim = c(min(var_values, na.rm = TRUE), upper)) +
+    labs(subtitle = paste("Médiane :", round(med, 1)),
+         x = "",
+         y = "",
+         fill = "Mandat") +
+    theme_minimal(base_size = 14) +
+    theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 16),
+          plot.subtitle = element_text(hjust = 0.5, size = 12, color = "gray40"),
+          axis.title.y = element_text(margin = margin(r = 10)),
+          axis.title.x = element_text(margin = margin(t = 10)),
+          legend.position = "bottom")
+  
+  # Convertir en plotly interactif
+  ggplotly(p) %>% layout(hovermode = "x")
 }
 ```
 
 
 
-# Statistiques descriptives 
-
-## Distributions Bati 
 
 ::: {.panel-tabset}
 
-### Surface crée
+### Surface crée 
 ```{r,echo=FALSE,warning=FALSE}
-hist_variable(gdf_RDD, surface_creee, titre_variable = "de la surface créée")
+dens_plot(gdf_RDD, surface_creee, titre_variable = "")
 ```
 
 ### Permis
 ```{r,echo=FALSE,warning=FALSE}
-hist_variable(gdf_RDD, nb_permis, titre_variable = "du nombre de permis")
+dens_plot(gdf_RDD, nb_permis, titre_variable = "")
 ```
 
 :::
@@ -207,14 +222,19 @@ plot<-ggplot() +
   geom_point(data = batiments_cum, aes(x = annee, y = cum_batiments, color = "Cumul bâtiments"), size = 2) +
   scale_color_manual(values = c("Nb clusters" = "#2C7FB8", "Cumul bâtiments" = "#D95F0E")) +
   labs(
-    title = "Évolution du nombre de clusters et des bâtiments BDTOPO (base 100 en 2014)",
-    x = "Année",
-    y = "Indice (base 100)",
+    x = "",
+    y = "Base 100 (2014)",
     color = ""
   ) +
-  theme_minimal(base_size = 14) +
-  theme(legend.position = "bottom")
-ggplotly(plot)
+  theme_minimal()+
+    theme(
+    legend.position = "bottom",       # légende sous le graphique
+    legend.key.width = unit(2, "lines")  # largeur des clés de la légende
+  )
+
+plot 
+#ggplotly(plot)%>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.05))
+
 ```
 
 ### Géo 
@@ -231,6 +251,8 @@ dt <- as.data.table(df_sf)
 
 # colonnes cluster à utiliser
 cols <- paste0("cluster_id_", annees_plot)
+
+dt <- dt[, c("ID", cols, "geom"), with = FALSE]
 
 # passage en format long
 dt_long <- melt(
@@ -341,6 +363,60 @@ summary_table
 ::: {.panel-tabset}
 
 
+### Matching
+
+```{r}
+df_plot <- df_match_Sitadel_BDTOPO %>%
+  st_set_geometry(NULL) %>%
+  filter(!is.na(ANNEE_REELLE_AUTORISATION)) %>%
+  group_by(annee = ANNEE_REELLE_AUTORISATION) %>%
+  summarise(
+    n_total = n(),
+    n_localisable = sum(ind_localisable > 0, na.rm = TRUE),
+    n_matched = sum(ind_localisable > 0 & ind_match_BDTOPO > 0, na.rm = TRUE),
+    prop_localisable = n_localisable / n_total,
+    prop_matched = n_matched / n_total,
+    .groups = "drop"
+  )
+
+df_long <- df_plot %>%
+  select(annee, prop_localisable, prop_matched) %>%
+  tidyr::pivot_longer(
+    cols = -annee,
+    names_to = "type",
+    values_to = "proportion"
+  ) %>%
+  mutate(type = recode(
+    type,
+    prop_localisable = "Localisable",
+    prop_matched = "Identifié dans BD Topo"
+  ))
+
+df_long$type <- factor(
+  df_long$type,
+  levels = c("Localisable", "Identifié dans BD Topo")
+)
+
+plot <-ggplot(df_long, aes(x = annee, y = proportion, fill = type)) +
+  geom_col(position = "identity", alpha = 1) +
+  scale_fill_manual(values = c(
+    "Localisable" = "lightgray",
+    "Identifié dans BD Topo" = "skyblue"
+  )) +
+  labs(
+    y="",
+    x = "",
+    fill = ""
+  ) +
+  ylim(0, 1) +
+  theme_minimal()+
+  theme(legend.position = "bottom")
+
+plot
+#ggplotly(plot)%>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.05))
+```
+
+
 ### Permis x clusters 
 
 ```{r,echo=FALSE,warning=FALSE}
@@ -381,8 +457,8 @@ graph <- ggplot(graph_df, aes(x = Annee, y = pct, color = stat)) +
     name = ""
   ) +
   labs(
-    x = "Année",
-    y = "%"
+    x = "",
+    y = ""
   ) +
   theme_minimal(base_size = 14) +
   theme(
@@ -392,21 +468,21 @@ graph <- ggplot(graph_df, aes(x = Annee, y = pct, color = stat)) +
   )
 
 # Convertir en Plotly interactif
-ggplotly(graph)
+ggplotly(graph)%>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
 ```
 
 
 ### Permis in cluster 2025
 
-```{r,warning=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 # 1️⃣ Définir les périodes
-periodes <- c("2014-2019", "2020-2025")
+periodes <- c("2014-2020", "2020-2025")
 
 # 2️⃣ Tous les départements
 url_deps <- "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
-departements_sf <- st_read(url_deps)%>%
-  mutate(DEP_CODE=as.integer(code))
+departements_sf <- sf::st_read(url_deps, quiet = TRUE) %>%
+  mutate(DEP_CODE = as.integer(code))
 deps <- departements_sf %>% st_set_geometry(NULL) %>% select(DEP_CODE)
 
 # 3️⃣ Créer toutes les combinaisons DEP × période
@@ -448,7 +524,7 @@ departements_sf <- departements_sf %>%
 map_data <- departements_sf %>%
   left_join(df_map_period_full, by = "DEP_CODE")
 
-ggplot(map_data) +
+carte<-ggplot(map_data) +
   geom_sf(aes(fill = pct_cluster_stat1), color = "white", size = 0.1) +
   scale_fill_viridis(
     option = "viridis",
@@ -464,6 +540,7 @@ ggplot(map_data) +
     legend.text  = element_text(size = 10)
   )
 
+carte
 ```
 
 
@@ -471,35 +548,37 @@ ggplot(map_data) +
 
 ```{r}
 
-#PAS BON PCQ ON VEUT LA TAILLE GLOBALE 
-clusters_global <- df_cluster %>%
-  st_set_geometry(NULL) %>%   # <-- supprime la colonne geom
+df_base_cluster <- df_cluster %>%
+  st_set_geometry(NULL) %>%
+  filter(cluster_id_2025 != -1) %>%
+  group_by(cluster_id_2025, Base) %>%
+  summarise(
+    nb_bat = n(),   # nombre de lignes = nb de bâtiments
+    .groups = "drop"
+  )
+
+df_cluster_size <- df_cluster %>%
+  st_set_geometry(NULL) %>%
   filter(cluster_id_2025 != -1) %>%
   group_by(cluster_id_2025) %>%
   summarise(
-    nb_bdtopo = sum(Base == "BDTOPO"),
-    nb_sitadel = sum(Base == "Sitadel")
-  ) %>%
-  ungroup()%>%
-  pivot_longer(
-    cols = c(nb_bdtopo, nb_sitadel),
-    names_to = "Base",
-    values_to = "taille"
-  ) %>%
-  filter(taille > 0) %>%   # garder seulement les valeurs non nulles
-  mutate(Base = recode(Base, nb_bdtopo = "BDTOPO", nb_sitadel = "Sitadel"))
+    taille_cluster = n(),
+    .groups = "drop"
+  )
 
-plot<-ggplot(clusters_global, aes(x = taille, fill = Base)) +
+df_final <- df_base_cluster %>%
+  left_join(df_cluster_size, by = "cluster_id_2025")
+
+plot <- ggplot(df_final, aes(x = taille_cluster, fill = Base)) +
   geom_density(alpha = 0.5) +
   scale_x_log10() +
   theme_minimal() +
   labs(
-    title = "Densité de la taille des clusters par source (2025)",
-    x = "Nombre de bâtiments dans le cluster pour cette source",
+    x = "Taille des clusters",
     y = "Densité"
   )
 
-ggplotly(plot)
+ggplotly(plot)%>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
 
 ```
 
