@@ -221,27 +221,33 @@ tableau_mandat <- tableau_mandat %>%
 ```
 
 ```{r}
-pct_communes_per_mandat <- gdf_RDD %>%
-  mutate(Mandat = case_when(
-    election == 2014 ~ "2014-2019",
-    election == 2020 ~ "2020-2025",
-    TRUE ~ as.character(election)
-  )) %>%
-  group_by(Mandat) %>%
-  summarise(
-    n_total = n(),                  # nombre total de communes
-    n_with_permis = sum(nb_permis > 0)  # communes avec nb_permis>0
-  ) %>%
-  mutate(pct_with_permis = n_with_permis / n_total * 100) %>%
-  arrange(Mandat)
+calcul_pct_communes <- function(gdf_RDD) {
+  gdf_RDD %>%
+    mutate(
+      Mandat = case_when(
+        election == 2014 ~ "2014-2019",
+        election == 2020 ~ "2020-2025",
+        TRUE ~ as.character(election)
+      ),
+      nb_permis = ifelse(is.na(nb_permis), 0, nb_permis)  # sécurise les NA
+    ) %>%
+    group_by(Mandat) %>%
+    summarise(
+      n_total = n(),
+      n_with_permis = sum(nb_permis > 0),
+      .groups = "drop"
+    ) %>%
+    mutate(pct_with_permis = n_with_permis / n_total * 100) %>%
+    arrange(Mandat) %>%
+    rename(
+      "Nombre de communes" = n_total,
+      "Avec permis" = n_with_permis,
+      "%" = pct_with_permis
+    )
+}
 
-# Si tu veux renommer les colonnes pour l’affichage
-pct_communes_per_mandat <- pct_communes_per_mandat %>%
-  rename(
-    "Nombre de communes" = n_total,
-    "Avec permis" = n_with_permis,
-    "%" = pct_with_permis
-  )
+pct_communes_duels<-calcul_pct_communes(gdf_RDD)
+pct_communes_RDD_seuil<-calcul_pct_communes(gdf_RDD_seuil)
 
 ```
 
@@ -251,8 +257,12 @@ kable(tableau_mandat,
       caption = "Sous-champs : communes avec une étiquette politique aux élections", 
       digits = 1) 
 
-kable(pct_communes_per_mandat, 
-      caption = "Sous-champ : communes du RDD", 
+kable(pct_communes_duels, 
+      caption = "Sous-champ : communes avec une opposition droite/gauche", 
+      digits = 1) 
+
+kable(pct_communes_RDD_seuil, 
+      caption = "Sous-champ : communes du RDD (fenêtre +/- 4 pts)", 
       digits = 1) 
 ```
 
