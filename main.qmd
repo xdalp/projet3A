@@ -254,7 +254,7 @@ pct_communes_RDD_seuil<-calcul_pct_communes(gdf_RDD_seuil)
 
 ```{r tableau mandat}
 kable(tableau_mandat, 
-      caption = "Sous-champs : communes avec une étiquette politique aux élections", 
+      caption = "Sous-champ : communes avec une étiquette politique aux élections", 
       digits = 1) 
 
 kable(pct_communes_duels, 
