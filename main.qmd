@@ -23,7 +23,8 @@ packages <- c("dplyr", "ggplot2", "reticulate",
               "rdrobust","dotenv","plotly","shiny", 
               "dotenv","RColorBrewer","tidyverse",
               "sf", "gt",
-              "viridis","rnaturalearth","rnaturalearthdata") #carto
+              "viridis","rnaturalearth","rnaturalearthdata",
+              "knitr") 
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -39,6 +40,7 @@ lapply(packages, install_if_missing)
 #| echo: false
 #| output: false
 library(rnaturalearth)
+library(knitr)
 library(sf)
 library(ggplot2)
 library(rnaturalearth)
@@ -165,6 +167,94 @@ dens_plot <- function(data, variable, election_col = "election", titre_variable 
 
 
 ::: {.panel-tabset}
+
+
+### Communes x permis
+
+```{r}
+communes_all <- read_csv("data/donnees_electorales/donnees_muni_epci_completes.csv") %>%
+  mutate(
+    Mandat = case_when(
+      annee >= 2014 & annee <= 2019 ~ "2014-2020",
+      annee >= 2020 & annee <= 2025 ~ "2020-2025",
+      TRUE ~ as.character(annee)
+    ),
+    COMM = as.integer(ident_election_ville)
+  ) %>%
+  select(Mandat, COMM) %>%
+  distinct()  # une seule ligne par commune par mandat
+
+df_permis <- df_match_Sitadel_BDTOPO %>%
+  st_set_geometry(NULL) %>%
+  mutate(
+    Mandat = case_when(
+      ANNEE_REELLE_AUTORISATION >= 2014 & ANNEE_REELLE_AUTORISATION <= 2019 ~ "2014-2020",
+      ANNEE_REELLE_AUTORISATION >= 2020 & ANNEE_REELLE_AUTORISATION <= 2025 ~ "2020-2025",
+      TRUE ~ as.character(ANNEE_REELLE_AUTORISATION)
+    ),
+    COMM = as.integer(COMM)
+  ) %>%
+  filter(!is.na(COMM))%>%
+  group_by(Mandat,COMM)%>%
+  summarise(nb_permis=n())
+
+tableau_mandat <- communes_all %>%
+  left_join(df_permis,by = c("Mandat","COMM")) %>%
+  mutate(nb_permis = ifelse(is.na(nb_permis), 0, nb_permis)) %>%
+  group_by(Mandat)%>%
+  arrange(Mandat)%>%
+  summarise(
+    n_total = n(),                  # nombre total de communes
+    n_with_permis = sum(nb_permis > 0)  # communes avec nb_permis>0
+  ) %>%
+  mutate(pct_with_permis = n_with_permis / n_total * 100) %>%
+  arrange(Mandat)
+
+# Si tu veux renommer les colonnes pour l’affichage
+tableau_mandat <- tableau_mandat %>%
+  rename(
+    "Nombre de communes" = n_total,
+    "Avec permis" = n_with_permis,
+    "%" = pct_with_permis
+  )
+
+```
+
+```{r}
+pct_communes_per_mandat <- gdf_RDD %>%
+  mutate(Mandat = case_when(
+    election == 2014 ~ "2014-2019",
+    election == 2020 ~ "2020-2025",
+    TRUE ~ as.character(election)
+  )) %>%
+  group_by(Mandat) %>%
+  summarise(
+    n_total = n(),                  # nombre total de communes
+    n_with_permis = sum(nb_permis > 0)  # communes avec nb_permis>0
+  ) %>%
+  mutate(pct_with_permis = n_with_permis / n_total * 100) %>%
+  arrange(Mandat)
+
+# Si tu veux renommer les colonnes pour l’affichage
+pct_communes_per_mandat <- pct_communes_per_mandat %>%
+  rename(
+    "Nombre de communes" = n_total,
+    "Avec permis" = n_with_permis,
+    "%" = pct_with_permis
+  )
+
+```
+
+
+```{r}
+kable(tableau_mandat, 
+      caption = "Sous-champs : communes avec une étiquette politique aux élections", 
+      digits = 1) 
+
+kable(pct_communes_per_mandat, 
+      caption = "Sous-champ : communes du RDD", 
+      digits = 1) 
+```
 
 ### Surface crée 
 ```{r,echo=FALSE,warning=FALSE}
@@ -345,10 +435,17 @@ plot_data[, cluster_size_norm := cluster_size / sum(cluster_size), by = Annee] #
 
 summary_table <- plot_data[, .(
   mean_cluster_size = mean(cluster_size),
-  mean_cluster_size_norm = mean(cluster_size_norm)
+  mean_cluster_size_norm = mean(cluster_size_norm)*1000
 ), by = Annee]
 
-summary_table
+summary_table<- summary_table%>%rename(
+    "Taille moyenne" = mean_cluster_size,
+    "Taille moyenne normalisée" = mean_cluster_size_norm
+  )
+
+kable(summary_table, 
+      caption = "Taille moyenne des clusters et taille normalisée selon le nb de batiments") 
+
 
 #et si on plot des distrib très proches
 
@@ -501,7 +598,7 @@ df_map_period <- df_cluster %>%
   ungroup() %>%
   mutate(
     periode = case_when(
-      Annee_REF >= 2014 & Annee_REF <= 2019 ~ "2014-2019",
+      Annee_REF >= 2014 & Annee_REF <= 2019 ~ "2014-2020",
       Annee_REF >= 2020 & Annee_REF <= 2025 ~ "2020-2025",
       TRUE ~ NA_character_
     )
@@ -537,7 +634,10 @@ carte<-ggplot(map_data) +
   theme(
     legend.position = "bottom",
     legend.title = element_text(size = 12),
-    legend.text  = element_text(size = 10)
+    legend.text  = element_text(size = 10),
+    axis.title = element_blank(),     # pas de titre d'axes
+    axis.text = element_blank(),      # pas de texte des axes
+    axis.ticks = element_blank()  
   )
 
 carte
@@ -634,10 +734,31 @@ ggplotly(distrib_vote(gdf_RDD_seuil)) %>% layout(legend = list(orientation = "h"
 ```
 
 
-### Distrib "delta" du score
+### Delta score
 ```{r,echo=FALSE,warning=FALSE}
 #avance du candidat de droite par rapport au candidat de gauche
-hist_variable(gdf_RDD, delta_score_1, titre_variable = "du delta de score")
+
+hist_variable <- function(data, variable, titre_variable = NULL, bins = 50) {
+  var_quo <- enquo(variable)
+  var_name <- if (is.null(titre_variable)) as_label(var_quo) else titre_variable
+  med <- median(dplyr::pull(data, !!var_quo), na.rm = TRUE)
+  
+  p <- ggplot(data, aes(x = !!var_quo)) +
+    geom_histogram(bins = bins, fill = "#2C7FB8", color = "white", alpha = 0.8) +
+    geom_vline(xintercept = med, linetype = "dashed", size = 1, color = "#000000") +
+    labs(subtitle = paste("Médiane :", round(med, 1)),
+         x = "",
+         y = "") +
+    theme_minimal(base_size = 14) +
+    theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 16),
+          plot.subtitle = element_text(hjust = 0.5, size = 12, color = "gray40"),
+          axis.title.y = element_text(margin = margin(r = 10)),
+          axis.title.x = element_text(margin = margin(t = 10)))
+  
+  ggplotly(p) %>% layout(bargap = 0.05, hovermode = "x")
+}
+
+hist_variable(gdf_RDD, delta_score_1, titre_variable = "")
 ```
 
 
