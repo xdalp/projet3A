@@ -15,16 +15,18 @@ execute:
 ---
 
 
-```{r}
+```{r Installation packages}
 #| echo: false
 #| output: false
+#| cache: false
 
 packages <- c("dplyr", "ggplot2", "reticulate",
               "rdrobust","dotenv","plotly","shiny", 
               "dotenv","RColorBrewer","tidyverse",
               "sf", "gt",
               "viridis","rnaturalearth","rnaturalearthdata",
-              "knitr") 
+              "knitr",
+              "plotly") 
 
 # Installer seulement ceux qui ne sont pas déjà installés
 install_if_missing <- function(pkg) {
@@ -36,9 +38,10 @@ install_if_missing <- function(pkg) {
 lapply(packages, install_if_missing)
 ```
 
-```{r}
+```{r Chargement packages}
 #| echo: false
 #| output: false
+#| cache: false
 library(rnaturalearth)
 library(knitr)
 library(sf)
@@ -61,14 +64,21 @@ library(rlang)
 ```
 
 
-```{r IMPORT DONNEES}
+```{r Chargement fcts}
 #| echo: false
 #| output: false
 #| context: setup
+#| cache: false
 
 setwd("/home/onyxia/work/projet3A")
 # Charger les fonctions
 source("functions/main_functions.R")
+```
+
+```{r Import des données}
+#| echo: false
+#| output: false
+#| context: setup
 
 #chargement des var d'env pour Caro
 if (file.exists(".env")) {
@@ -99,14 +109,14 @@ df_match_Sitadel_BDTOPO <- get_s3_gpkg("mgarbe", remote_path_match)
 
 ```
 
-```{r}
+```{r Création de gdf au seuil}
 #| echo: false
 #| output: false
 #| context: data
 
 #récupérer l'objet Python
-seuil <- 8
-gdf_RDD_seuil <- gdf_RDD %>% filter(abs(delta_score_1) < seuil)
+seuil_RDD <- 8
+gdf_RDD_seuil <- gdf_RDD %>% filter(abs(delta_score_1) < seuil_RDD)
 ```
 
 
@@ -116,7 +126,7 @@ gdf_RDD_seuil <- gdf_RDD %>% filter(abs(delta_score_1) < seuil)
 
 
 
-```{r,echo=FALSE,warning=FALSE}
+```{r Description du bati,echo=FALSE,warning=FALSE}
 dens_plot <- function(data, variable, election_col = "election", titre_variable = NULL, right_pct = 0.97, adjust = 1) {
   
   var_quo <- enquo(variable)
@@ -169,7 +179,7 @@ dens_plot <- function(data, variable, election_col = "election", titre_variable 
 ::: {.panel-tabset}
 
 
-### Communes x permis
+### Communes et permis
 
 ```{r}
 communes_all <- read_csv("data/donnees_electorales/donnees_muni_epci_completes.csv") %>%
@@ -337,7 +347,7 @@ plot
 
 ```
 
-### Géo 
+### Géographie
 
 ```{r carte,echo=FALSE,warning=FALSE}
 
@@ -465,12 +475,12 @@ kable(summary_table,
 :::
 
 
-## Clustering x Sitadel
+## Données croisées Clustering et Sitadel
 
 ::: {.panel-tabset}
 
 
-### Matching
+### Appariement
 
 ```{r matching}
 df_plot <- df_match_Sitadel_BDTOPO %>%
@@ -524,7 +534,7 @@ plot
 ```
 
 
-### Permis x clusters 
+### Permis en cluster
 
 ```{r permis x cluster,echo=FALSE,warning=FALSE}
 
@@ -579,9 +589,9 @@ ggplotly(graph)%>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "ce
 ```
 
 
-### Permis in cluster 2025
+### Carto des permis en cluster (2025)
 
-```{r permis dans cluster 2025, echo=FALSE, message=FALSE, warning=FALSE}
+```{r Carto permis dans cluster 2025}
 
 # 1️⃣ Définir les périodes
 periodes <- c("2014-2020", "2020-2025")
@@ -654,7 +664,7 @@ carte
 ```
 
 
-### Taille
+### Taille des clusters
 
 ```{r}
 
@@ -736,7 +746,6 @@ ggplotly(distrib_vote(gdf_RDD)) %>% layout(legend = list(orientation = "h",x = 0
 ```
 
 
-
 ### Duels au seuil seulement
 
 ```{r,echo=FALSE,warning=FALSE}
@@ -771,124 +780,149 @@ hist_variable <- function(data, variable, titre_variable = NULL, bins = 50) {
 hist_variable(gdf_RDD, delta_score_1, titre_variable = "")
 ```
 
-
-### Nb obs sans contrainte de seuil
-```{r,echo=FALSE,warning=FALSE}
-
-nb_obs_ss_seuil <- gdf_RDD %>%
-                  arrange(election) %>%
-                  mutate(rang1_Nuance = recode(
-                    rang1_Nuance,
-                    "-1" = "Gauche",
-                    "1" = "Droite"
-                  )) %>%
-                  group_by(election,rang1_Nuance) %>%
-                  summarise(n = n(), .groups = "drop") %>%
-                  gt() %>%
-                  tab_header(
-                    title = "Nombre d'observations par couleur politique et élection",
-                    subtitle = "Résumé des effectifs"
-                  ) %>%
-                  cols_label(
-                    rang1_Nuance = "Couleur politique",
-                    election = "Année de l'élection",
-                    n = "Nombre d'observations"
-                  ) %>%
-                  fmt_number(
-                    columns = n,
-                    decimals = 0,
-                    sep_mark = " ",
-                    dec_mark = ","
-                  )
-
-print(nb_obs_ss_seuil)
-```
-
-
 :::
 
 
-## Bati x vote 
+## Données croisées Sitadel et vote
 
-::: {.panel-tabset}
-
-### Surface moyenne créée 
 ```{r}
 moyennes_par_couleur_muni = gdf_RDD %>%
-                      group_by(rang1_Nuance, election) %>%
+                      group_by(election,rang1_Nuance) %>%
                       summarise(moyenne_nb_permis = mean(nb_permis, na.rm = TRUE),
-                                moyenne_surface = mean(surface_creee)) %>%
+                                moyenne_surface = mean(surface_creee),
+                                total_nb_permis   = sum(nb_permis, na.rm = TRUE)) %>%
                       ungroup()
-print(moyennes_par_couleur_muni$moyenne_nb_permis)
+
+moyennes_par_couleur_muni_seuil = gdf_RDD_seuil %>%
+                      group_by(election,rang1_Nuance) %>%
+                      summarise(moyenne_nb_permis = mean(nb_permis, na.rm = TRUE),
+                                moyenne_surface = mean(surface_creee),
+                                total_nb_permis   = sum(nb_permis, na.rm = TRUE)) %>%
+                      ungroup()
 ```
 
-### Nb de permis autorisés
 ```{r}
-tab_nb_permis_surf <- moyennes_par_couleur_muni %>% 
-    arrange(election) %>% 
-    group_by(election) %>% 
-    mutate(rang1_Nuance = recode(
-                      rang1_Nuance,
-                      "-1" = "Gauche",
-                      "1" = "Droite")) %>% 
-    gt() %>% 
-    tab_header(
-      title = "Nombre moyen de permis et surface moyenne durant le mandat",
-      subtitle = "Par couleur politique"
-    )  %>% cols_label(
-    rang1_Nuance = "Couleur politique",
-    moyenne_nb_permis = "Nombre moyen de permis",
-    moyenne_surface = "Surface moyenne des permis de construire"
-  ) %>% 
-  fmt_number(
-    columns = c(moyenne_nb_permis),
-    decimals = 2,
-    dec_mark = ",") %>% 
-  fmt_number(
-    columns = c(moyenne_surface),
-    decimals = 0,
-    sep_mark = " ",
-    dec_mark = ","
-  )
+moyennes_par_couleur_muni %>%
+  arrange(election, rang1_Nuance) %>%
+  mutate(rang1_Nuance = recode(rang1_Nuance, "-1" = "DVG", "1" = "DVD")) %>%
+  rename(
+    `Élection`          = election,
+    `Couleur politique` = rang1_Nuance,
+    `Nb permis moyen`   = moyenne_nb_permis,
+    `Surface moyenne`   = moyenne_surface,
+    `Total permis autorisés`   = total_nb_permis
+  ) %>%
+  kable(digits = 2, caption = 'Champ : ensemble des "duels" DVG/DVD') 
 
-tab_nb_permis_surf
-# pour avoir en latex : cat(as_latex(tab_nb_permis_surf))
+moyennes_par_couleur_muni_seuil %>%
+  arrange(election, rang1_Nuance) %>%
+  mutate(rang1_Nuance = recode(rang1_Nuance, "-1" = "DVG", "1" = "DVD")) %>%
+  rename(
+    `Élection`          = election,
+    `Couleur politique` = rang1_Nuance,
+    `Nb permis moyen`   = moyenne_nb_permis,
+    `Surface moyenne`   = moyenne_surface,
+    `Total permis autorisés`   = total_nb_permis
+  ) %>%
+  kable(digits = 2,caption = paste0('Champ : "duels" autour du seuil (+/- ', seuil_RDD, ')'))
 ```
 
 
-:::
+# Regression discontinuity design (RDD)
 
-# Balanced Checks 
+## Balanced Checks 
 
 ::: {.panel-tabset}
 
 ```{r}
-#| echo: false
-#| results: asis
-#| warning: false
+#| cache: false
 
 # Variables BC
-bc_vars <- grep("^BC_", names(gdf_RDD_seuil), value = TRUE)
-tab_names <- c("Population", "Densité de population", "Chômage", "Emploi")
-stopifnot(length(bc_vars) == length(tab_names))
 
-for (i in seq_along(bc_vars)) {
-  # Titre de l'onglet
-  cat(paste0("## ", tab_names[i], "\n\n"))
-  p <- plot_rdd(gdf_RDD_seuil, outcome_var = bc_vars[i])
-  print(p)
-  cat("\n\n")
-}
+BC_pop<-rdd_table_plot(df = gdf_RDD,
+                        outcome_var = "BC_pop",
+                        y_label="Population")
+
+BC_dens<-rdd_table_plot(df = gdf_RDD,
+                        outcome_var = "BC_dens_pop",
+                        y_label="Densité de population")
+
+BC_emploi<-rdd_table_plot(df = gdf_RDD,
+                        outcome_var = "BC_taux_emploi",
+                        y_label="Emploi")
+
+
+BC_chom<-rdd_table_plot(df = gdf_RDD,
+                        outcome_var = "BC_taux_chom",
+                        y_label="Chômage")
+
 ```
 
-## Géographie
+### Tables
+```{r}
+#| cache: false
+#| echo: false 
 
-```{r geographie,echo=FALSE,warning=FALSE}
+BC_pop$table
+BC_dens$table
+BC_emploi$table
+BC_chom$table
+```
+
+### Population
+
+```{r}
+#| cache: false
+#| echo: false 
+
+ggplotly(BC_pop$plot)
+```
+
+### Densité de population
+
+```{r}
+#| cache: false
+#| echo: false 
+
+ggplotly(BC_dens$plot)
+```
+
+
+### Emploi
+
+```{r}
+#| cache: false
+#| echo: false 
+
+ggplotly(BC_emploi$plot)
+```
+
+### Chômage
+
+```{r}
+#| cache: false
+#| echo: false 
+
+ggplotly(BC_chom$plot)
+```
+
+
+### Géographie
+
+```{r Geographie}
+#| cache: true
+
 #code INSEE au seuil
 codes <- gdf_RDD_seuil %>% select('Code INSEE') %>% pull()
 
 #utilisation API géographique
-communes_list <- lapply(codes, get_commune_contour)
+#communes_list <- lapply(codes, get_commune_contour)
+communes_list <- lapply(codes, function(code) {
+  result <- get_commune_contour(code)
+  if (is.null(result)) return(NULL)
+  result
+})
+communes_list <- Filter(Negate(is.null), communes_list)
 communes_geo <- do.call(rbind, communes_list)
 communes_map <- communes_geo %>% select(code,geometry) %>% 
   left_join(gdf_RDD_seuil, by = c("code" = "Code INSEE"))
@@ -905,50 +939,15 @@ carte <- ggplot(communes_map) +
   facet_wrap(~election) +
   theme_minimal()
 
-ggplotly(carte) %>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.2)) 
+ggplotly(carte) %>% plotly::layout(legend = list(orientation = "h", x = 0.5, xanchor = "center", y = -0.2))
 
 ```
 
 :::
 
-# Régressions
+## Résultats
 
-```{r, echo=FALSE}
-# Fonction pour générer graphique + table
-rdd_report <- function(data, outcome_var, kernel, effet_fixe = NULL,elections= c(2014, 2020)) {
-  # Graphique
-  p <- plot_rdd_kernel(data, outcome_var = outcome_var,kernel)
-  
-    # Table RDD
-  if (!is.null(effet_fixe)) {
-    tab <- compute_rdd(
-      df = data,
-      outcome_var = outcome_var,
-      kernel_choisi = kernel,
-      cov_choisies = effet_fixe,
-      elections = elections
-    )
-  } else {
-    tab <- compute_rdd(
-      df = data,
-      outcome_var = outcome_var,
-      kernel_choisi = kernel,
-      cov_choisies = NULL,
-      elections = elections
-    )
-  }
-  
-  # Retourne un tibble/table + graphique dans une liste
-  list(
-    plot = p,
-    table = tab
-  )
-}
-
-```
-
-
-```{r}
+```{r Ajout clusters à gdf_RDD}
 #RDD clustring
 df_RDD_cluster<-df_cluster %>%
   filter(Base == "Sitadel", SURF_CREEE > seuil) %>%
@@ -977,157 +976,92 @@ df_RDD_cluster<-df_cluster %>%
   )%>%
   mutate(election=factor(election))
 
-gdf_RDD_seuil<-gdf_RDD_seuil %>%
+gdf_RDD<-gdf_RDD %>%
   left_join(df_RDD_cluster, by = c("Code INSEE", "election"))
 ```
 
-## Figures
 
-```{r fig_rdd,echo=FALSE,cache=TRUE}
-#nb permis 
-rdd_nb_permis_uni <- rdd_report(gdf_RDD_seuil,"nb_permis", kernel = "uni") 
-rdd_nb_permis_tri <- rdd_report(gdf_RDD_seuil,"nb_permis", kernel = "tri") 
+```{r Régression des RDD}
+#| cache: false
+#| echo: false 
 
-#surface
-rdd_surf_uni <- rdd_report(gdf_RDD_seuil,"surface_creee", kernel = "uni") 
-rdd_surf_tri <- rdd_report(gdf_RDD_seuil,"surface_creee", kernel = "tri") 
+#PAR DEFAUT KERNEL TRIANGULAIRE
+rdd_permis<-rdd_table_plot(df = gdf_RDD,
+                              y_label="Nombre de permis",
+                              outcome_var = "nb_permis")
 
-#nb permis dummy
-rdd_nb_permis_uni_dummy <- rdd_report(gdf_RDD_seuil,"dummy_permis", kernel = "uni") 
-rdd_nb_permis_tri_dummy <- rdd_report(gdf_RDD_seuil,"dummy_permis", kernel = "tri")  
+rdd_permis_bin<-rdd_table_plot(df = gdf_RDD,
+                              y_label="Autorisation d'un permis a minima",
+                              outcome_var = "dummy_permis")
 
-#surface moyenne 
-rdd_surf_moy_uni <- rdd_report(gdf_RDD_seuil,"surface_moyenne", kernel = "uni") 
-rdd_surf_moy_tri <- rdd_report(gdf_RDD_seuil,"surface_moyenne", kernel = "tri") 
+rdd_surf<-rdd_table_plot(df = gdf_RDD,
+                              y_label="Surface totale crée",
+                              outcome_var = "surface_creee")
 
-#cluster pct 
-rdd_cluster_pct_uni <- rdd_report(gdf_RDD_seuil,"pct_cluster_aut", kernel = "uni") 
-rdd_cluster_pct_tri <- rdd_report(gdf_RDD_seuil,"pct_cluster_aut", kernel = "tri") 
+rdd_surf_moy<-rdd_table_plot(df = gdf_RDD,
+                              y_label="Surface moyenne par permis",
+                              outcome_var = "surface_moyenne")
+
+rdd_cluster<-rdd_table_plot(df = gdf_RDD,
+                              y_label="Part des autorisations en cluster",
+                              outcome_var = "pct_cluster_aut")
+ 
 ```
 
 ::: {.panel-tabset}
 
-### [Permis] kernel uni
+### Tables
 ```{r}
-print(rdd_nb_permis_uni$plot)
+#| cache: false
+#| echo: false 
+
+rdd_permis$table
+rdd_permis_bin$table
+rdd_surf$table
+rdd_surf_moy$table
+rdd_cluster$table
 ```
 
-### [Permis] kernel tri
-
-```{r}
-print(rdd_nb_permis_tri$plot)
-```
-
-
-### [Permis : binaire] kernel uni
-```{r}
-print(rdd_nb_permis_uni_dummy$plot)
-```
-
-### [Permis : binaire] kernel tri
+### Permis
 
 ```{r}
-print(rdd_nb_permis_tri_dummy$plot)
+#| cache: false
+#| echo: false 
+
+ggplotly(rdd_permis$plot)
 ```
 
 
-### [Surface créée] kernel uni
+### Permis binaire
 ```{r}
-print(rdd_surf_uni$plot)
+#| cache: false
+#| echo: false 
+
+ggplotly(rdd_permis_bin$plot)
 ```
 
-### [Surface créée] kernel tri
-
-```{r}
-print(rdd_surf_tri$plot)
-```
-
-
-
-### [Surface moyenne] kernel uni
-```{r}
-print(rdd_surf_moy_uni$plot)
-```
-
-### [Surface moyenne] kernel tri
+### Surface
 
 ```{r}
-print(rdd_surf_moy_tri$plot)
+#| cache: false
+#| echo: false 
+
+ggplotly(rdd_surf$plot)
 ```
 
 
-### [Pct cluster] kernel uni
-
+### Surface moyenne 
 ```{r}
-print(rdd_cluster_pct_uni$plot)
+#| cache: false
+#| echo: false 
+
+ggplotly(rdd_surf_moy$plot)
 ```
 
-### [Pct cluster] kernel tri
-
+### Clusters
 ```{r}
-print(rdd_cluster_pct_tri$plot)
+#| cache: false
+#| echo: false 
+
+ggplotly(rdd_cluster$plot)
 ```
-
-
-:::
-
-
-
-## Tables
-
-::: {.panel-tabset}
-
-### [Permis] kernel uni
-
-```{r premiere_table}
-print(rdd_nb_permis_uni$tab)
-```
-
-### [Permis] kernel tri
-
-```{r}
-print(rdd_nb_permis_tri$tab)
-```
-
-### [Permis : binaire] kernel uni
-
-```{r}
-print(rdd_nb_permis_uni_dummy$tab)
-```
-
-### [Permis : binaire] kernel tri
-
-```{r}
-print(rdd_nb_permis_tri_dummy$tab)
-```
-
-
-### [Surface créée] kernel uni
-
-```{r}
-print(rdd_surf_uni$tab)
-```
-
-### [Surface créée] kernel tri
-
-```{r}
-print(rdd_surf_tri$tab)
-```
-
-
-
-
-### [Surface moyenne] kernel uni
-
-```{r}
-print(rdd_surf_moy_uni$tab)
-```
-
-### [Surface moyenne] kernel tri
-
-```{r}
-print(rdd_surf_moy_tri$tab)
-```
-
-:::
-
