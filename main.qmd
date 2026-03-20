@@ -236,7 +236,7 @@ calcul_pct_communes <- function(gdf_RDD) {
   gdf_RDD %>%
     mutate(
       Mandat = case_when(
-        election == 2014 ~ "2014-2019",
+        election == 2014 ~ "2014-2020",
         election == 2020 ~ "2020-2025",
         TRUE ~ as.character(election)
       ),
@@ -273,7 +273,7 @@ kable(pct_communes_duels,
       digits = 1) 
 
 kable(pct_communes_RDD_seuil, 
-      caption = "Sous-champ : communes du RDD (fenêtre +/- 4 pts)", 
+      caption = paste0("Sous-champ : communes du RDD (fenêtre +/- ",seuil_RDD," pts)"), 
       digits = 1) 
 ```
 
