@@ -162,6 +162,7 @@ dens_plot <- function(data, variable, election_col = "election", titre_variable 
          y = "",
          fill = "Mandat") +
     theme_minimal(base_size = 14) +
+    scale_fill_manual(values = c("2014-2020" = "#8B3F8B", "2020-2025" = "#5BB8F5"))
     theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 16),
           plot.subtitle = element_text(hjust = 0.5, size = 12, color = "gray40"),
           axis.title.y = element_text(margin = margin(r = 10)),
@@ -169,7 +170,7 @@ dens_plot <- function(data, variable, election_col = "election", titre_variable 
           legend.position = "bottom")
   
   # Convertir en plotly interactif
-  ggplotly(p) %>% layout(hovermode = "x")
+  ggplotly(p)%>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.05))
 }
 ```
 
@@ -326,10 +327,10 @@ batiments_cum <- df_cluster %>%
 
 # Plot avec un seul axe
 plot<-ggplot() +
-  geom_line(data = clusters_count, aes(x = annee, y = nb_clusters, color = "Nb clusters"), size = 1.2) +
-  geom_point(data = clusters_count, aes(x = annee, y = nb_clusters, color = "Nb clusters"), size = 2) +
-  geom_line(data = batiments_cum, aes(x = annee, y = cum_batiments, color = "Cumul bâtiments"), size = 1.2) +
-  geom_point(data = batiments_cum, aes(x = annee, y = cum_batiments, color = "Cumul bâtiments"), size = 2) +
+  geom_line(data = clusters_count, aes(x = annee, y = nb_clusters, color = "Nb clusters")) +
+  geom_point(data = clusters_count, aes(x = annee, y = nb_clusters, color = "Nb clusters")) +
+  geom_line(data = batiments_cum, aes(x = annee, y = cum_batiments, color = "Cumul bâtiments")) +
+  geom_point(data = batiments_cum, aes(x = annee, y = cum_batiments, color = "Cumul bâtiments")) +
   scale_color_manual(values = c("Nb clusters" = "#2C7FB8", "Cumul bâtiments" = "#D95F0E")) +
   labs(
     x = "",
@@ -342,12 +343,12 @@ plot<-ggplot() +
     legend.key.width = unit(2, "lines")  # largeur des clés de la légende
   )
 
-plot 
-#ggplotly(plot)%>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.05))
+#plot 
+ggplotly(plot)%>% layout(legend = list(orientation = "h",x = 0.5, xanchor = "center",y = -0.05))
 
 ```
 
-### Géographie
+### Géographie (2025)
 
 ```{r carte,echo=FALSE,warning=FALSE}
 
@@ -412,23 +413,26 @@ france <- ne_countries(
   returnclass = "sf"
 ) |> st_transform(4326)
 
-carte<-ggplot() +
+carte <- ggplot() +
   geom_sf(data = france, fill = "grey95", color = "black") +
   geom_sf(
     data = clusters_map,
-    aes(size = n_bat, color = factor(Annee)),
+    aes(size = n_bat),
+    color = "#612C79",   # couleur fixe, plus de légende année
     alpha = 0.7
   ) +
-  scale_color_viridis_d(option = "viridis", name = "Année") +
   scale_size(
-    range = c(0.5, 10),
-    breaks = c(10,20,50, 100, 500, 1000),
-    name = "Nb bâtiments")+
-  #facet_wrap(~Annee) +
+    range  = c(0.2, 7),
+    breaks = c(10, 20, 50, 100, 500, 1000),
+    name   = "Nombre de bâtiments"
+  ) +
   coord_sf(xlim = c(-5, 10), ylim = c(41, 51)) +
-  theme_minimal(base_size = 14)
+  theme_minimal() +
+  theme(legend.position = "bottom")
 
-carte
+plotly::ggplotly(carte) %>%
+  plotly::layout(legend = list(orientation = "h", x = 0.5, xanchor = "center", y = -0.1))
+
 ```
 
 
@@ -693,6 +697,7 @@ plot <- ggplot(df_final, aes(x = taille_cluster, fill = Base)) +
   geom_density(alpha = 0.5) +
   scale_x_log10() +
   theme_minimal() +
+  scale_fill_manual(values = c("Sitadel" = "#8B3F8B", "BDTOPO" = "#5BB8F5"))+
   labs(
     x = "Taille des clusters",
     y = "Densité"
