@@ -277,7 +277,7 @@ kable(pct_communes_RDD_seuil,
       digits = 1) 
 ```
 
-### Surface crée 
+### Surface créée 
 ```{r,echo=FALSE,warning=FALSE}
 dens_plot(gdf_RDD, surface_creee, titre_variable = "")
 ```
@@ -1022,7 +1022,7 @@ rdd_permis_bin<-rdd_table_plot(df = gdf_RDD,
                               outcome_var = "dummy_permis")
 
 rdd_surf<-rdd_table_plot(df = gdf_RDD,
-                              y_label="Surface totale crée",
+                              y_label="Surface totale créée",
                               outcome_var = "surface_creee")
 
 rdd_surf_moy<-rdd_table_plot(df = gdf_RDD,
@@ -1045,7 +1045,7 @@ rdd_covar_permis_bin<-rdd_table_plot(df = gdf_RDD,
                               cov_choisies="Nuance_interco")
 
 rdd_covar_surf<-rdd_table_plot(df = gdf_RDD,
-                              y_label="Surface totale crée",
+                              y_label="Surface totale créée",
                               outcome_var = "surface_creee",
                               cov_choisies="Nuance_interco")
 
