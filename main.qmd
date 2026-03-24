@@ -1010,12 +1010,38 @@ rdd_surf_moy<-rdd_table_plot(df = gdf_RDD,
 rdd_cluster<-rdd_table_plot(df = gdf_RDD,
                               y_label="Part des autorisations en cluster",
                               outcome_var = "pct_cluster_aut")
+
+# IDEM MAIS CONTROLE NUANCE INTERCO
+rdd_covar_permis<-rdd_table_plot(df = gdf_RDD,
+                              y_label="Nombre de permis",
+                              outcome_var = "nb_permis",
+                              cov_choisies="Nuance_interco")
+
+rdd_covar_permis_bin<-rdd_table_plot(df = gdf_RDD,
+                              y_label="Autorisation d'un permis a minima",
+                              outcome_var = "dummy_permis",
+                              cov_choisies="Nuance_interco")
+
+rdd_covar_surf<-rdd_table_plot(df = gdf_RDD,
+                              y_label="Surface totale crée",
+                              outcome_var = "surface_creee",
+                              cov_choisies="Nuance_interco")
+
+rdd_covar_surf_moy<-rdd_table_plot(df = gdf_RDD,
+                              y_label="Surface moyenne par permis",
+                              outcome_var = "surface_moyenne",
+                              cov_choisies="Nuance_interco")
+
+rdd_covar_cluster<-rdd_table_plot(df = gdf_RDD,
+                              y_label="Part des autorisations en cluster",
+                              outcome_var = "pct_cluster_aut",
+                              cov_choisies="Nuance_interco")
  
 ```
 
 ::: {.panel-tabset}
 
-### Tables
+### Tab 
 ```{r}
 #| cache: false
 #| echo: false 
@@ -1026,6 +1052,20 @@ rdd_surf$table
 rdd_surf_moy$table
 rdd_cluster$table
 ```
+
+### Tab covar
+
+```{r}
+#| cache: false
+#| echo: false 
+
+rdd_covar_permis$table
+rdd_covar_permis_bin$table
+rdd_covar_surf$table
+rdd_covar_surf_moy$table
+rdd_covar_cluster$table
+```
+
 
 ### Permis
 
