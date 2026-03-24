@@ -4,6 +4,11 @@
 
 ## Guide utilisateur
 
+### Consulter les sorties
+
+Les sorties sont directement accessibles ici. [![voir le rapport](https://img.shields.io/badge/Voir%20le%20rapport-HTML-blue)](https://xdalp.github.io/projet3A/)
+
+
 ### Accès aux données
 
 Le code, et notamment le `quarto`, nécessite un accès aux données stockées sur un espace MinIO privé. L'accès à ces données se fait via des identifiants éphémères à stocker dans son environnement local. Ces identifiants peuvent être demandés à [cette adresse](mailto:mateo.garbe@ensae.fr).

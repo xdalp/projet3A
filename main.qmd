@@ -5,7 +5,8 @@ format:
   html:
     toc: true
     theme: cosmo
-    self-contained: true
+    embed-resources: true
+    output-file: main.html
 execute: 
     echo: false
     warning: false
@@ -13,7 +14,6 @@ execute:
     cache: true
     cache-dir: _cache
 ---
-
 
 ```{r Installation packages}
 #| echo: false
@@ -862,6 +862,28 @@ BC_chom<-rdd_table_plot(df = gdf_RDD,
                         y_label="Chômage")
 
 ```
+
+
+### Stats
+
+```{r}
+#| cache: false
+#| echo: false 
+
+gdf_RDD_seuil%>% 
+  select(election,BC_pop,BC_dens_pop,BC_taux_emploi,BC_taux_chom)%>%
+  group_by(election)%>%
+  summarise("Population moyenne"=mean(BC_pop),
+            "Population médiane"=median(BC_pop),
+            "Densité médiane"=median(BC_dens_pop),
+            "Taux d'emploi médiane"=median(BC_taux_emploi),
+            "Taux de chômage médiane"=median(BC_taux_chom,na.rm=TRUE))%>%
+  mutate(election=ifelse(election==2014,"2014-2020","2020-2025"))%>%
+  rename("Mandat"=election)%>%
+  kable(digits = 1,caption = paste0('Champ : "duels" autour du seuil (+/- ', seuil_RDD, ')'))
+```
+
+
 
 ### Tables
 ```{r}
