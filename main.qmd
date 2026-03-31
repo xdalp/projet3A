@@ -13,6 +13,10 @@ execute:
     message: false
     cache: true
     cache-dir: _cache
+knitr:
+  opts_chunk:
+    kable.opts:
+      row.names: false
 ---
 
 ```{r Installation packages}
@@ -73,6 +77,15 @@ library(rlang)
 setwd("/home/onyxia/work/projet3A")
 # Charger les fonctions
 source("functions/main_functions.R")
+```
+
+
+```{r setup, include=FALSE}
+library(knitr)
+# Wrapper qui force row.names=FALSE partout
+kable <- function(..., row.names = FALSE) {
+  knitr::kable(..., row.names = row.names)
+}
 ```
 
 ```{r Import des données}
